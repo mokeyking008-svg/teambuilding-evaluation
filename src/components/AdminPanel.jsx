@@ -1,0 +1,254 @@
+import { useState } from 'react';
+import PlanForm from './PlanForm';
+
+const ADMIN_PASSWORD = 'admin2025';
+
+export default function AdminPanel({ plans, onSavePlans, onExit }) {
+  const [authenticated, setAuthenticated] = useState(false);
+  const [password, setPassword] = useState('');
+  const [pwdError, setPwdError] = useState('');
+  const [editingPlan, setEditingPlan] = useState(null); // null = list, 'new' = add, plan obj = edit
+  const [deleteConfirm, setDeleteConfirm] = useState(null);
+  const [toast, setToast] = useState('');
+
+  const showToast = (msg) => {
+    setToast(msg);
+    setTimeout(() => setToast(''), 2000);
+  };
+
+  const handleLogin = () => {
+    if (password === ADMIN_PASSWORD) {
+      setAuthenticated(true);
+      setPwdError('');
+    } else {
+      setPwdError('密码错误，请重试');
+    }
+  };
+
+  const handleAdd = (planData) => {
+    const updated = [...plans, planData];
+    onSavePlans(updated);
+    setEditingPlan(null);
+    showToast('✅ 方案添加成功！');
+  };
+
+  const handleEdit = (planData) => {
+    const updated = plans.map(p => p.id === planData.id ? planData : p);
+    onSavePlans(updated);
+    setEditingPlan(null);
+    showToast('✅ 方案修改成功！');
+  };
+
+  const handleDelete = (planId) => {
+    const updated = plans.filter(p => p.id !== planId);
+    // 同时清理该方案的评分/点评/投票
+    const ratings = JSON.parse(localStorage.getItem('tb_ratings') || '{}');
+    const reviews = JSON.parse(localStorage.getItem('tb_reviews') || '{}');
+    const votes = JSON.parse(localStorage.getItem('tb_votes') || '{}');
+    delete ratings[planId];
+    delete reviews[planId];
+    // 移除投票中投给该方案的记录
+    const filteredVotes = {};
+    Object.entries(votes).forEach(([uid, pid]) => {
+      if (pid !== planId) filteredVotes[uid] = pid;
+    });
+    localStorage.setItem('tb_ratings', JSON.stringify(ratings));
+    localStorage.setItem('tb_reviews', JSON.stringify(reviews));
+    localStorage.setItem('tb_votes', JSON.stringify(filteredVotes));
+
+    onSavePlans(updated);
+    setDeleteConfirm(null);
+    showToast('🗑️ 方案已删除');
+  };
+
+  // 密码验证界面
+  if (!authenticated) {
+    return (
+      <div className="fixed inset-0 z-50 flex items-center justify-center modal-overlay bg-black/40">
+        <div className="bg-white rounded-2xl shadow-2xl w-[90vw] max-w-sm p-6 mx-4" onClick={e => e.stopPropagation()}>
+          <div className="text-center mb-5">
+            <div className="inline-flex items-center justify-center w-14 h-14 bg-orange-100 rounded-full mb-3">
+              <span className="text-2xl">🔐</span>
+            </div>
+            <h2 className="text-xl font-bold text-gray-800">管理员验证</h2>
+            <p className="text-sm text-gray-500 mt-1">请输入管理员密码</p>
+          </div>
+          <input
+            type="password"
+            value={password}
+            onChange={e => { setPassword(e.target.value); setPwdError(''); }}
+            onKeyDown={e => e.key === 'Enter' && handleLogin()}
+            placeholder="输入密码..."
+            className={`w-full px-4 py-3 bg-gray-50 border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-orange-300 focus:border-orange-400 transition text-center tracking-widest ${pwdError ? 'border-red-300 bg-red-50' : 'border-gray-200'}`}
+            autoFocus
+          />
+          {pwdError && <p className="text-xs text-red-500 mt-2 text-center">{pwdError}</p>}
+          <div className="flex gap-3 mt-4">
+            <button
+              onClick={onExit}
+              className="flex-1 py-3 bg-gray-100 text-gray-600 font-medium rounded-xl hover:bg-gray-200 transition"
+            >
+              返回
+            </button>
+            <button
+              onClick={handleLogin}
+              className="flex-1 py-3 bg-gradient-to-r from-primary to-primary-light text-white font-bold rounded-xl hover:from-primary-dark hover:to-primary transition shadow-md"
+            >
+              验证
+            </button>
+          </div>
+          <p className="text-xs text-gray-400 text-center mt-4">提示：默认密码 admin2025</p>
+        </div>
+      </div>
+    );
+  }
+
+  // 表单模式
+  if (editingPlan === 'new' || (editingPlan && typeof editingPlan === 'object')) {
+    return (
+      <div className="fixed inset-0 z-50 overflow-y-auto bg-black/40 modal-overlay">
+        <div className="min-h-full flex items-start justify-center py-8 px-4" onClick={onExit}>
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg relative" onClick={e => e.stopPropagation()}>
+            <div className="p-6 border-b border-gray-100 flex items-center justify-between">
+              <h2 className="text-lg font-bold text-gray-800">
+                {editingPlan === 'new' ? '➕ 新增方案' : '✏️ 编辑方案'}
+              </h2>
+              <button
+                onClick={() => setEditingPlan(null)}
+                className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 transition text-gray-400"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+              </button>
+            </div>
+            <div className="p-6">
+              <PlanForm
+                plan={editingPlan === 'new' ? null : editingPlan}
+                onSave={editingPlan === 'new' ? handleAdd : handleEdit}
+                onCancel={() => setEditingPlan(null)}
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // 管理列表
+  return (
+    <div className="fixed inset-0 z-50 overflow-y-auto bg-black/40 modal-overlay" onClick={onExit}>
+      <div className="min-h-full flex items-start justify-center py-8 px-4" onClick={e => e.stopPropagation()}>
+        <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl relative">
+          {/* Toast */}
+          {toast && (
+            <div className="fixed top-6 left-1/2 -translate-x-1/2 z-[60] bg-success text-white px-6 py-3 rounded-full shadow-lg font-medium text-sm">
+              {toast}
+            </div>
+          )}
+
+          {/* Header */}
+          <div className="p-6 border-b border-gray-100 flex items-center justify-between">
+            <div>
+              <h2 className="text-lg font-bold text-gray-800">⚙️ 方案管理</h2>
+              <p className="text-sm text-gray-500 mt-0.5">共 {plans.length} 个方案</p>
+            </div>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setEditingPlan('new')}
+                className="flex items-center gap-1.5 px-4 py-2 bg-gradient-to-r from-primary to-primary-light text-white text-sm font-bold rounded-xl hover:from-primary-dark hover:to-primary transition shadow-sm"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4"/>
+                </svg>
+                新增
+              </button>
+              <button
+                onClick={onExit}
+                className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 transition text-gray-400"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          {/* 方案列表 */}
+          <div className="p-4 space-y-2 max-h-[60vh] overflow-y-auto">
+            {plans.map(plan => (
+              <div
+                key={plan.id}
+                className="flex items-center gap-3 p-3 rounded-xl hover:bg-gray-50 transition group"
+              >
+                <img src={plan.cover} alt={plan.name} className="w-16 h-12 rounded-lg object-cover flex-shrink-0" />
+                <div className="flex-1 min-w-0">
+                  <p className="font-medium text-gray-800 text-sm truncate">{plan.name}</p>
+                  <div className="flex items-center gap-2 text-xs text-gray-400 mt-0.5">
+                    <span>📍 {plan.location}</span>
+                    <span>💰 ¥{plan.budgetNum}/人</span>
+                  </div>
+                </div>
+                <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition">
+                  <button
+                    onClick={() => setEditingPlan(plan)}
+                    className="p-2 text-gray-400 hover:text-blue-500 hover:bg-blue-50 rounded-lg transition"
+                    title="编辑"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                    </svg>
+                  </button>
+                  <button
+                    onClick={() => setDeleteConfirm(plan.id)}
+                    className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition"
+                    title="删除"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                    </svg>
+                  </button>
+                </div>
+              </div>
+            ))}
+            {plans.length === 0 && (
+              <div className="text-center py-12">
+                <span className="text-4xl">📭</span>
+                <p className="text-gray-400 mt-2">暂无方案，点击上方按钮新增</p>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* 删除确认框 */}
+      {deleteConfirm && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/50" onClick={() => setDeleteConfirm(null)}>
+          <div className="bg-white rounded-2xl shadow-2xl w-[90vw] max-w-sm p-6 mx-4" onClick={e => e.stopPropagation()}>
+            <div className="text-center mb-4">
+              <div className="inline-flex items-center justify-center w-14 h-14 bg-red-100 rounded-full mb-3">
+                <span className="text-2xl">⚠️</span>
+              </div>
+              <h3 className="text-lg font-bold text-gray-800">确认删除？</h3>
+              <p className="text-sm text-gray-500 mt-1">删除后该方案的评分、点评和投票数据将一并清除，此操作不可恢复。</p>
+            </div>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setDeleteConfirm(null)}
+                className="flex-1 py-3 bg-gray-100 text-gray-600 font-medium rounded-xl hover:bg-gray-200 transition"
+              >
+                取消
+              </button>
+              <button
+                onClick={() => handleDelete(deleteConfirm)}
+                className="flex-1 py-3 bg-red-500 text-white font-bold rounded-xl hover:bg-red-600 transition"
+              >
+                确认删除
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
