@@ -5,6 +5,7 @@ import defaultPlans from './data/plans';
 import LoginModal from './components/LoginModal';
 import ReviewSection from './components/ReviewSection';
 import AdminPanel from './components/AdminPanel';
+import VoteResults from './components/VoteResults';
 import {
   Tent, Settings, LogIn, Vote, SearchX,
   MapPin, Clock, Coins, Star, X, FileText,
@@ -353,6 +354,10 @@ function App() {
           />
         )}
 
+        {/* 投票结果 */}
+        <div className="mb-8">
+          <VoteResults plans={plans} getVoteCount={getVoteCount} getTotalVotes={getTotalVotes} votes={votes} refreshKey={refreshKey} />
+        </div>
       </main>
 
       <footer className="text-center py-6 text-xs text-white/25 relative z-10">

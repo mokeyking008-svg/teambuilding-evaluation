@@ -33,28 +33,6 @@ export default function VoteResults({ plans, getVoteCount, getTotalVotes, votes,
 
   return (
     <div className="space-y-8">
-      {/* 投票进度 - Glass */}
-      <div className="btn-glass rounded-2xl p-5 text-white">
-        <div className="flex items-center justify-between">
-          <div>
-            <p className="text-white/70 text-sm">投票人数</p>
-            <p className="text-3xl font-bold mt-1">{totalVotes}</p>
-          </div>
-          <div className="text-right">
-            <p className="text-white/70 text-sm">参与方案数</p>
-            <p className="text-3xl font-bold mt-1">{plans.length}</p>
-          </div>
-        </div>
-        {totalVotes > 0 && (
-          <div className="mt-3 bg-white/20 rounded-full h-2">
-            <div
-              className="bg-white rounded-full h-2 transition-all duration-500"
-              style={{ width: `${Math.min(totalVotes / plans.length / 3 * 100, 100)}%` }}
-            />
-          </div>
-        )}
-      </div>
-
       {/* 投票柱状图 */}
       <div>
         <h3 className="text-lg font-bold text-white/90 mb-4 flex items-center gap-2">
