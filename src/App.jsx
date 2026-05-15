@@ -6,10 +6,12 @@ import LoginModal from './components/LoginModal';
 import ReviewSection from './components/ReviewSection';
 import AdminPanel from './components/AdminPanel';
 import VoteResults from './components/VoteResults';
+import VoteToast, { showToast } from './components/VoteToast';
 import {
   Tent, Settings, LogIn, Vote, SearchX,
   MapPin, Clock, Coins, Star, X, FileText,
   Sparkles, CheckCircle, ThumbsUp,
+  MessageSquare, TrendingUp,
 } from 'lucide-react';
 
 // 方案存储 key
@@ -121,9 +123,18 @@ function App() {
   // 投票
   const handleVote = (planId) => {
     if (!user) { setShowLogin(true); return; }
+    const wasAlreadyVoted = getUserVote(user.id) !== null;
     vote(user.id, planId);
     setVoteAnimId(planId);
     setTimeout(() => setVoteAnimId(null), 600);
+    // 显示 toast（投票或改投都显示）
+    const plan = plans.find(p => p.id === planId);
+    if (plan) {
+      // 延迟一帧以读取更新后的投票数
+      setTimeout(() => {
+        showToast(plan.name, getTotalVotes());
+      }, 50);
+    }
   };
 
   // 展开详情
@@ -365,6 +376,7 @@ function App() {
       </footer>
 
       {/* Modals */}
+      <VoteToast />
       {showLogin && (
         <LoginModal onLogin={(u) => { login(u); setShowLogin(false); }} onClose={() => setShowLogin(false)} />
       )}
@@ -443,6 +455,9 @@ function PlanDetailModal({ plan, user, onClose, onVote, getUserVote, voteAnimId,
                 ))}
               </div>
             )}
+
+            {/* 已收到的评价 - 大众点评风格 */}
+            <ReviewSummary planId={plan.id} getQuickRatingData={getQuickRatingData} getReviewData={getReviewData} />
 
             {/* 推荐指数评分滑块 */}
             <QuickRatingPanel
@@ -589,6 +604,105 @@ function QuickRatingPanel({ planId, user, getQuickRatingData, onRefresh }) {
         )}
         <span className="text-xs text-white/25">超推荐</span>
       </div>
+    </div>
+  );
+}
+
+// 详情页评价摘要 - 大众点评风格
+function ReviewSummary({ planId, getQuickRatingData, getReviewData }) {
+  const qrd = getQuickRatingData(planId);
+  const reviewData = getReviewData(planId);
+
+  const avgScore = qrd.getAverage();
+  const ratingCount = qrd.getRatingCount();
+  const reviewCount = reviewData.reviews.length;
+
+  // 评分分布统计
+  const allQuickRatings = JSON.parse(localStorage.getItem('tb_quick_ratings') || '{}');
+  const planRatings = allQuickRatings[planId] || {};
+  const scoreValues = Object.values(planRatings);
+
+  const scoreDistribution = [5, 4, 3, 2, 1].map(score => {
+    const count = scoreValues.filter(v => Math.round(v) === score).length;
+    return { score, count, percent: scoreValues.length > 0 ? (count / scoreValues.length) * 100 : 0 };
+  });
+
+  // 评价摘要（取最新3条点评的前20字）
+  const recentReviews = [...reviewData.reviews]
+    .sort((a, b) => new Date(b.updatedAt || b.createdAt) - new Date(a.updatedAt || a.createdAt))
+    .slice(0, 3);
+
+  if (ratingCount === 0 && reviewCount === 0) return null;
+
+  return (
+    <div className="glass rounded-xl p-4 sm:p-5">
+      {/* 标题 */}
+      <div className="flex items-center justify-between mb-4">
+        <span className="text-sm font-bold text-white/90 flex items-center gap-1.5">
+          <MessageSquare className="w-4 h-4 text-accent" /> 已收到的评价
+        </span>
+        <span className="text-xs text-white/30">
+          {ratingCount}人评分{reviewCount > 0 ? ` · ${reviewCount}条点评` : ''}
+        </span>
+      </div>
+
+      <div className="flex gap-5">
+        {/* 左侧：大分数 */}
+        <div className="flex flex-col items-center justify-center flex-shrink-0 min-w-[70px]">
+          <div className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-b from-white to-white/70">
+            {avgScore > 0 ? avgScore.toFixed(1) : '-'}
+          </div>
+          <div className="flex items-center gap-0.5 mt-1">
+            {[1, 2, 3, 4, 5].map(s => (
+              <Star
+                key={s}
+                className={`w-3 h-3 ${s <= Math.round(avgScore) ? 'text-star fill-star' : 'text-white/15'}`}
+              />
+            ))}
+          </div>
+          <span className="text-xs text-white/30 mt-1">{ratingCount}人评</span>
+        </div>
+
+        {/* 右侧：评分分布 */}
+        <div className="flex-1 space-y-1.5">
+          {scoreDistribution.map(({ score, count, percent }) => (
+            <div key={score} className="flex items-center gap-2">
+              <span className="text-xs text-white/40 w-4 text-right flex-shrink-0">{score}</span>
+              <div className="flex-1 h-[6px] bg-white/5 rounded-full overflow-hidden">
+                <div
+                  className="h-full rounded-full transition-all duration-500"
+                  style={{
+                    width: `${Math.max(percent, count > 0 ? 4 : 0)}%`,
+                    background: score >= 4 ? 'linear-gradient(90deg, #667EEA, #A78BFA)'
+                      : score === 3 ? 'linear-gradient(90deg, #F59E0B, #FBBF24)'
+                      : 'linear-gradient(90deg, #EF4444, #F87171)',
+                  }}
+                />
+              </div>
+              <span className="text-xs text-white/25 w-5 text-right flex-shrink-0">{count}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* 最新点评摘要 */}
+      {recentReviews.length > 0 && (
+        <div className="mt-4 pt-3 border-t border-white/5 space-y-2">
+          <div className="flex items-center gap-1.5">
+            <TrendingUp className="w-3.5 h-3.5 text-accent" />
+            <span className="text-xs font-medium text-white/50">最新点评</span>
+          </div>
+          {recentReviews.map((review, idx) => (
+            <div key={idx} className="flex items-start gap-2">
+              <img src={review.userAvatar} alt={review.userName} className="w-5 h-5 rounded-full flex-shrink-0 mt-0.5" />
+              <p className="text-xs text-white/40 leading-relaxed">
+                <span className="text-white/60 font-medium">{review.userName}</span>
+                {'：'}{review.content.length > 30 ? review.content.slice(0, 30) + '...' : review.content}
+              </p>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
