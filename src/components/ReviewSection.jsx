@@ -1,5 +1,19 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { MessageSquare, PenLine, Users, PartyPopper } from 'lucide-react';
+
+// 带文字降级的头像组件
+function Avatar({ src, name, size = 'w-8 h-8' }) {
+  const [error, setError] = useState(false);
+  const handleErr = useCallback(() => setError(true), []);
+  const textClass = size === 'w-5 h-5' ? 'text-[10px]' : size === 'w-6 h-6' ? 'text-xs' : 'text-sm';
+  return error || !src ? (
+    <div className={`${size} rounded-full bg-gradient-to-br from-primary/60 to-accent/60 flex items-center justify-center flex-shrink-0`}>
+      <span className={`${textClass} font-bold text-white`}>{(name || '?')[0]}</span>
+    </div>
+  ) : (
+    <img src={src} alt={name} className={`${size} rounded-full flex-shrink-0`} onError={handleErr} />
+  );
+}
 
 export default function ReviewSection({ user, planId, getUserReview, addReview, reviews }) {
   const existingReview = getUserReview(user?.id);
@@ -84,7 +98,7 @@ export default function ReviewSection({ user, planId, getUserReview, addReview, 
           {reviews.map((review, idx) => (
             <div key={idx} className="glass glass-hover rounded-xl p-4">
               <div className="flex items-center gap-3 mb-2">
-                <img src={review.userAvatar} alt={review.userName} className="w-8 h-8 rounded-full" />
+                <Avatar src={review.userAvatar} name={review.userName} />
                 <span className="font-medium text-white/80 text-sm">{review.userName}</span>
                 <span className="text-xs text-white/30 ml-auto">
                   {new Date(review.updatedAt || review.createdAt).toLocaleDateString('zh-CN')}

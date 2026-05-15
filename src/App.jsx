@@ -694,7 +694,9 @@ function ReviewSummary({ planId, getQuickRatingData, getReviewData }) {
           </div>
           {recentReviews.map((review, idx) => (
             <div key={idx} className="flex items-start gap-2">
-              <img src={review.userAvatar} alt={review.userName} className="w-5 h-5 rounded-full flex-shrink-0 mt-0.5" />
+              <div className="w-5 h-5 rounded-full bg-gradient-to-br from-primary/60 to-accent/60 flex items-center justify-center flex-shrink-0 mt-0.5">
+                <span className="text-[10px] font-bold text-white">{(review.userName || '?')[0]}</span>
+              </div>
               <p className="text-xs text-white/40 leading-relaxed">
                 <span className="text-white/60 font-medium">{review.userName}</span>
                 {'：'}{review.content.length > 30 ? review.content.slice(0, 30) + '...' : review.content}
