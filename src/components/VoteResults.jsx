@@ -1,4 +1,6 @@
-export default function VoteResults({ plans, getVoteCount, getTotalVotes, votes }) {
+import { useMemo } from 'react';
+
+export default function VoteResults({ plans, getVoteCount, getTotalVotes, votes, refreshKey }) {
   const totalVotes = getTotalVotes();
   const voteResults = {};
 
@@ -7,13 +9,17 @@ export default function VoteResults({ plans, getVoteCount, getTotalVotes, votes 
   });
 
   // 获取评分排名（读取滑块推荐指数 tb_quick_ratings）
-  const allQuickRatings = JSON.parse(localStorage.getItem('tb_quick_ratings') || '{}');
-  const ratingRanking = plans.map(plan => {
-    const planData = allQuickRatings[plan.id] || {};
-    const values = Object.values(planData);
-    const avg = values.length > 0 ? values.reduce((a, b) => a + b, 0) / values.length : 0;
-    return { ...plan, avgRating: avg, ratingCount: values.length };
-  }).sort((a, b) => b.avgRating - a.avgRating);
+  // refreshKey 变化时重新计算，确保滑块评分后排名立即更新
+  const ratingRanking = useMemo(() => {
+    const allQuickRatings = JSON.parse(localStorage.getItem('tb_quick_ratings') || '{}');
+    return plans.map(plan => {
+      const planData = allQuickRatings[plan.id] || {};
+      const values = Object.values(planData);
+      const avg = values.length > 0 ? values.reduce((a, b) => a + b, 0) / values.length : 0;
+      return { ...plan, avgRating: avg, ratingCount: values.length };
+    }).sort((a, b) => b.avgRating - a.avgRating);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [plans, refreshKey]);
 
   // 投票排名
   const voteRanking = plans.map(plan => ({

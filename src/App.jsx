@@ -360,7 +360,7 @@ function App() {
           </button>
           {showResults && (
             <div className="mt-4">
-              <VoteResults plans={plans} getVoteCount={getVoteCount} getTotalVotes={getTotalVotes} votes={votes} />
+              <VoteResults plans={plans} getVoteCount={getVoteCount} getTotalVotes={getTotalVotes} votes={votes} refreshKey={refreshKey} />
             </div>
           )}
         </div>
@@ -503,10 +503,17 @@ function CardQuickRating({ planId, user, getQuickRatingData, onRefresh }) {
   const handleSliderChange = (e) => {
     const val = parseFloat(e.target.value);
     setSliderVal(val);
+    // 实时保存，兼容移动端（onTouchEnd 在手指滑出滑块时可能不触发）
+    if (user) {
+      qrd.updateScore(user.id, val);
+      setJustRated(true);
+      onRefresh();
+    }
   };
 
   const handleSliderCommit = () => {
     if (!user) return;
+    // 桌面端 onMouseUp 兜底保存（已由 onChange 实时写入，这里是幂等操作）
     qrd.updateScore(user.id, sliderVal);
     setJustRated(true);
     onRefresh();
