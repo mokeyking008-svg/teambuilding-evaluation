@@ -418,7 +418,6 @@ function PlanDetailModal({ plan, user, onClose, onVote, getUserVote, voteAnimId,
               <div className="flex flex-wrap gap-2">
                 <span className="glass-solid text-white/90 text-xs px-3 py-1 rounded-full">📍 {plan.location}</span>
                 <span className="glass-solid text-white/90 text-xs px-3 py-1 rounded-full">⏱️ {plan.duration}</span>
-                <span className="glass-solid text-white/90 text-xs px-3 py-1 rounded-full">👥 最多{plan.maxPeople}人</span>
                 <span className="glass-solid text-white/90 text-xs px-3 py-1 rounded-full">💰 ¥{plan.budgetNum}/人</span>
               </div>
             </div>
