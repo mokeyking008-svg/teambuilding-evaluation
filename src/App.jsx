@@ -41,7 +41,6 @@ function App() {
   const [showLogin, setShowLogin] = useState(false);
   const [showAdmin, setShowAdmin] = useState(false);
   const [expandedPlan, setExpandedPlan] = useState(null);
-  const [ratingCardId, setRatingCardId] = useState(null); // 当前展开评分的卡片
   const [filterBudget, setFilterBudget] = useState('all');
   const [filterDuration, setFilterDuration] = useState('all');
   const [showResults, setShowResults] = useState(true);
@@ -112,6 +111,23 @@ function App() {
       getUserRating, updateRating,
       reviews: planReviews, addReview, getUserReview,
     };
+  };
+
+  // 一键评分数据（独立存储，与5维评分互不干扰）
+  const getQuickRatingData = (planId) => {
+    const all = JSON.parse(localStorage.getItem('tb_quick_ratings') || '{}');
+    const planData = all[planId] || {};
+    const values = Object.values(planData);
+    const getAverage = () => values.length ? values.reduce((a, b) => a + b, 0) / values.length : 0;
+    const getRatingCount = () => values.length;
+    const getUserScore = (userId) => planData[userId] || null;
+    const updateScore = (userId, score) => {
+      const a = JSON.parse(localStorage.getItem('tb_quick_ratings') || '{}');
+      if (!a[planId]) a[planId] = {};
+      a[planId][userId] = score;
+      localStorage.setItem('tb_quick_ratings', JSON.stringify(a));
+    };
+    return { getAverage, getRatingCount, getUserScore, updateScore };
   };
 
   // 过滤方案
@@ -265,7 +281,9 @@ function App() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 mb-8">
             {filteredPlans.map(plan => {
               const rd = getPlanRatingData(plan.id);
-              const avgScore = rd.getAverage();
+              const qrd = getQuickRatingData(plan.id);
+              // 角标优先用一键评分均分，降级用5维均分
+              const avgScore = qrd.getAverage() || rd.getAverage();
               const voteCount = getVoteCount(plan.id);
               const userVoted = getUserVote(user?.id);
               const isVotedByMe = userVoted === plan.id;
@@ -300,13 +318,11 @@ function App() {
                     </div>
                     <p className="text-sm text-white/60 leading-relaxed line-clamp-3">{plan.summary}</p>
 
-                    {/* 卡片上的评分入口 */}
-                    <CardRatingBar
+                    {/* 卡片上一键评分滑块 */}
+                    <CardQuickRating
                       planId={plan.id}
                       user={user}
-                      expanded={ratingCardId === plan.id}
-                      onToggle={(e) => { e.stopPropagation(); setRatingCardId(ratingCardId === plan.id ? null : plan.id); }}
-                      getPlanRatingData={getPlanRatingData}
+                      getQuickRatingData={getQuickRatingData}
                       onRefresh={forceRefresh}
                     />
 
@@ -523,79 +539,102 @@ function PlanDetailModal({ plan, user, onClose, onVote, getUserVote, voteAnimId,
   );
 }
 
-// 卡片上的迷你评分入口
-function CardRatingBar({ planId, user, expanded, onToggle, getPlanRatingData, onRefresh }) {
-  const rd = getPlanRatingData(planId);
-  const avgScore = rd.getAverage();
-  const ratingCount = rd.getRatingCount();
-  const myRating = rd.getUserRating(user?.id);
+// 卡片上一键评分滑块（推荐指数）
+function CardQuickRating({ planId, user, getQuickRatingData, onRefresh }) {
+  const qrd = getQuickRatingData(planId);
+  const avgScore = qrd.getAverage();
+  const ratingCount = qrd.getRatingCount();
+  const myScore = qrd.getUserScore(user?.id);
 
-  // 本地评分状态
-  const [scores, setScores] = useState(myRating || {
-    creativity: 0, feasibility: 0, cohesion: 0, costEffectiveness: 0, fun: 0,
-  });
-  const [justRated, setJustRated] = useState(!!myRating);
+  const [sliderVal, setSliderVal] = useState(myScore || 3.0);
+  const [justRated, setJustRated] = useState(!!myScore);
 
-  // 同步外部评分变化
   useEffect(() => {
-    const fresh = rd.getUserRating(user?.id);
-    if (fresh) { setScores(fresh); setJustRated(true); }
-  }, [rd, user?.id]);
+    const fresh = qrd.getUserScore(user?.id);
+    if (fresh) { setSliderVal(fresh); setJustRated(true); }
+  }, [qrd, user?.id]);
 
-  const handleQuickRate = (dimKey, val) => {
-    const newScores = { ...scores, [dimKey]: val };
-    setScores(newScores);
-    if (user) {
-      rd.updateRating(user.id, newScores);
-      setJustRated(true);
-      onRefresh();
-    }
+  const getScoreLabel = (val) => {
+    if (val < 1.5) return '不推荐';
+    if (val < 2.5) return '一般';
+    if (val < 3.5) return '还不错';
+    if (val < 4.5) return '推荐';
+    return '超推荐';
+  };
+
+  const getScoreColor = (val) => {
+    if (val < 2) return 'text-red-400';
+    if (val < 3) return 'text-orange-400';
+    if (val < 4) return 'text-yellow-400';
+    return 'text-green-400';
+  };
+
+  // 滑块背景填充百分比
+  const fillPercent = ((sliderVal - 1) / 4) * 100;
+
+  const handleSliderChange = (e) => {
+    const val = parseFloat(e.target.value);
+    setSliderVal(val);
+  };
+
+  const handleSliderCommit = () => {
+    if (!user) return;
+    qrd.updateScore(user.id, sliderVal);
+    setJustRated(true);
+    onRefresh();
   };
 
   return (
     <div className="mt-4 pt-3 border-t border-white/10" onClick={e => e.stopPropagation()}>
-      {/* 折叠行：点击展开评分 */}
-      <button
-        onClick={onToggle}
-        className="w-full flex items-center justify-between group/rate"
-      >
+      <div className="flex items-center justify-between mb-2">
+        <span className="text-xs text-white/40">✨ 推荐指数</span>
         <div className="flex items-center gap-2">
-          <span className="text-sm">✍️</span>
-          <span className="text-sm text-white/60 group-hover/rate:text-white/80 transition">
-            {justRated ? '已评分，点击修改' : '点击评分'}
-          </span>
-        </div>
-        {avgScore > 0 && (
-          <div className="flex items-center gap-1">
-            <span className="text-xs text-white/40">{ratingCount}人评</span>
-            <span className="text-sm font-bold text-star">⭐ {avgScore.toFixed(1)}</span>
-          </div>
-        )}
-        <svg className={`w-4 h-4 text-white/30 transition-transform duration-200 ${expanded ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7"/>
-        </svg>
-      </button>
-
-      {/* 展开后的评分面板 */}
-      {expanded && (
-        <div className="mt-3 space-y-2.5 animate-in">
-          {!user ? (
-            <p className="text-xs text-primary text-center py-2">登录后即可评分</p>
-          ) : (
-            ratingDimensions.map(dim => (
-              <div key={dim.key} className="flex items-center justify-between">
-                <span className="text-white/50 text-xs min-w-[60px] sm:min-w-[72px]">{dim.icon} {dim.label}</span>
-                <StarRating
-                  value={scores[dim.key]}
-                  onChange={(val) => handleQuickRate(dim.key, val)}
-                  size="sm"
-                  showLabel={true}
-                />
-              </div>
-            ))
+          {ratingCount > 0 && (
+            <span className="text-xs text-white/30">{ratingCount}人评</span>
+          )}
+          {justRated && (
+            <span className={`text-lg font-bold ${getScoreColor(sliderVal)}`}>
+              {sliderVal.toFixed(1)}
+            </span>
           )}
         </div>
-      )}
+      </div>
+
+      {/* 滑块 */}
+      <div className="relative mb-1.5">
+        <div
+          className="absolute top-1/2 -translate-y-1/2 left-0 h-[6px] rounded-full pointer-events-none"
+          style={{
+            width: `${fillPercent}%`,
+            background: 'linear-gradient(90deg, #667EEA, #A78BFA)',
+          }}
+        />
+        <input
+          type="range"
+          min="1"
+          max="5"
+          step="0.1"
+          value={sliderVal}
+          onChange={handleSliderChange}
+          onMouseUp={handleSliderCommit}
+          onTouchEnd={handleSliderCommit}
+          disabled={!user}
+          className="quick-slider relative w-full z-[1]"
+        />
+      </div>
+
+      {/* 两端标签 */}
+      <div className="flex items-center justify-between">
+        <span className="text-[10px] text-white/25">不推荐</span>
+        {user ? (
+          <span className={`text-[10px] ${justRated ? getScoreColor(sliderVal) : 'text-white/25'} transition-colors`}>
+            {justRated ? getScoreLabel(sliderVal) : '拖动评分'}
+          </span>
+        ) : (
+          <span className="text-[10px] text-primary/70">登录后可评分</span>
+        )}
+        <span className="text-[10px] text-white/25">超推荐</span>
+      </div>
     </div>
   );
 }
