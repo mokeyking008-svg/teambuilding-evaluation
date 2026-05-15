@@ -3,6 +3,7 @@ import { useUser, useRatings, useReviews, useVotes } from './hooks/useStore';
 import defaultPlans from './data/plans';
 import { ratingDimensions } from './data/plans';
 import LoginModal from './components/LoginModal';
+import StarRating from './components/StarRating';
 import RatingSection from './components/RatingSection';
 import VoteResults from './components/VoteResults';
 import AdminPanel from './components/AdminPanel';
@@ -40,6 +41,7 @@ function App() {
   const [showLogin, setShowLogin] = useState(false);
   const [showAdmin, setShowAdmin] = useState(false);
   const [expandedPlan, setExpandedPlan] = useState(null);
+  const [ratingCardId, setRatingCardId] = useState(null); // 当前展开评分的卡片
   const [filterBudget, setFilterBudget] = useState('all');
   const [filterDuration, setFilterDuration] = useState('all');
   const [showResults, setShowResults] = useState(false);
@@ -290,10 +292,17 @@ function App() {
                       <span className="tag-glass inline-flex items-center gap-1 text-xs text-white/70 px-2 py-1 rounded-full">👥 {plan.maxPeople}人</span>
                     </div>
                     <p className="text-sm text-white/60 leading-relaxed line-clamp-3">{plan.summary}</p>
-                    <div className="flex items-center justify-between mt-4 pt-3 border-t border-white/10">
-                      <span className="gradient-text font-bold text-lg">¥{plan.budgetNum}<span className="text-xs text-white/30 font-normal">/人</span></span>
-                      <span className="text-xs text-white/40">🗳️ {voteCount} 票</span>
-                    </div>
+
+                    {/* 卡片上的评分入口 */}
+                    <CardRatingBar
+                      planId={plan.id}
+                      user={user}
+                      expanded={ratingCardId === plan.id}
+                      onToggle={(e) => { e.stopPropagation(); setRatingCardId(ratingCardId === plan.id ? null : plan.id); }}
+                      getPlanRatingData={getPlanRatingData}
+                      onRefresh={forceRefresh}
+                    />
+
                     <button
                       onClick={(e) => { e.stopPropagation(); handleVote(plan.id); }}
                       className={`mt-3 w-full py-2.5 rounded-xl text-sm font-bold transition ${
@@ -503,6 +512,83 @@ function PlanDetailModal({ plan, user, onClose, onVote, getUserVote, voteAnimId,
           </div>
         </div>
       </div>
+    </div>
+  );
+}
+
+// 卡片上的迷你评分入口
+function CardRatingBar({ planId, user, expanded, onToggle, getPlanRatingData, onRefresh }) {
+  const rd = getPlanRatingData(planId);
+  const avgScore = rd.getAverage();
+  const ratingCount = rd.getRatingCount();
+  const myRating = rd.getUserRating(user?.id);
+
+  // 本地评分状态
+  const [scores, setScores] = useState(myRating || {
+    creativity: 0, feasibility: 0, cohesion: 0, costEffectiveness: 0, fun: 0,
+  });
+  const [justRated, setJustRated] = useState(!!myRating);
+
+  // 同步外部评分变化
+  useEffect(() => {
+    const fresh = rd.getUserRating(user?.id);
+    if (fresh) { setScores(fresh); setJustRated(true); }
+  }, [rd, user?.id]);
+
+  const handleQuickRate = (dimKey, val) => {
+    const newScores = { ...scores, [dimKey]: val };
+    setScores(newScores);
+    if (user) {
+      rd.updateRating(user.id, newScores);
+      setJustRated(true);
+      onRefresh();
+    }
+  };
+
+  return (
+    <div className="mt-4 pt-3 border-t border-white/10" onClick={e => e.stopPropagation()}>
+      {/* 折叠行：点击展开评分 */}
+      <button
+        onClick={onToggle}
+        className="w-full flex items-center justify-between group/rate"
+      >
+        <div className="flex items-center gap-2">
+          <span className="text-sm">✍️</span>
+          <span className="text-sm text-white/60 group-hover/rate:text-white/80 transition">
+            {justRated ? '已评分，点击修改' : '点击评分'}
+          </span>
+        </div>
+        {avgScore > 0 && (
+          <div className="flex items-center gap-1">
+            <span className="text-xs text-white/40">{ratingCount}人评</span>
+            <span className="text-sm font-bold text-star">⭐ {avgScore.toFixed(1)}</span>
+          </div>
+        )}
+        <svg className={`w-4 h-4 text-white/30 transition-transform duration-200 ${expanded ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7"/>
+        </svg>
+      </button>
+
+      {/* 展开后的评分面板 */}
+      {expanded && (
+        <div className="mt-3 space-y-2.5 animate-in">
+          {!user ? (
+            <p className="text-xs text-primary text-center py-2">登录后即可评分</p>
+          ) : (
+            ratingDimensions.map(dim => (
+              <div key={dim.key} className="flex items-center justify-between">
+                <span className="text-white/50 text-xs min-w-[72px]">{dim.icon} {dim.label}</span>
+                <StarRating
+                  value={scores[dim.key]}
+                  onChange={(val) => handleQuickRate(dim.key, val)}
+                  size="sm"
+                  showLabel={true}
+                />
+              </div>
+            ))
+          )}
+        </div>
+      )}
     </div>
   );
 }
