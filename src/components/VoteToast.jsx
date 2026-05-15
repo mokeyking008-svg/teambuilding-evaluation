@@ -41,7 +41,7 @@ export default function VoteToast() {
 
   return (
     <div
-      className={`fixed top-[68px] left-1/2 -translate-x-1/2 z-[100] transition-all ${
+      className={`fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-[100] transition-all ${
         toast.show
           ? 'opacity-100 translate-y-0'
           : 'opacity-0 -translate-y-4 pointer-events-none'
