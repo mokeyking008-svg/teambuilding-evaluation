@@ -215,7 +215,7 @@ function App() {
         <div className="mb-6 space-y-2 sm:space-y-3">
           <div className="flex flex-wrap gap-1.5 sm:gap-2 items-center">
             <Coins className="w-3.5 h-3.5 text-white/40 flex-shrink-0" />
-            <span className="text-xs sm:text-sm font-medium text-white/50">预算/人</span>
+            <span className="text-xs sm:text-sm font-medium text-white/50">预算/人<span className="hidden sm:inline">均预算：</span></span>
             {[
               { key: 'all', label: '全部' },
               { key: '0-200', label: '0～200' },
@@ -237,7 +237,7 @@ function App() {
           </div>
           <div className="flex flex-wrap gap-1.5 sm:gap-2 items-center">
             <Clock className="w-3.5 h-3.5 text-white/40 flex-shrink-0" />
-            <span className="text-xs sm:text-sm font-medium text-white/50">时长</span>
+            <span className="text-xs sm:text-sm font-medium text-white/50">时长<span className="hidden sm:inline">（团建时长）：</span></span>
             {[
               { key: 'all', label: '全部' },
               { key: '0.5天', label: '0.5天' },
