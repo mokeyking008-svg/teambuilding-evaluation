@@ -6,19 +6,19 @@ const emptyForm = {
   name: '',
   cover: '',
   location: '',
-  duration: '一天',
-  budget: '100-200',
+  duration: '全天',
+  budget: '0-200',
   budgetNum: 150,
   summary: '',
   details: '',
   tags: '',
 };
 
-const durationOptions = ['半天', '一天', '两天+'];
+const durationOptions = ['0.5天', '全天', '2天'];
 const budgetOptions = [
-  { value: '0-100', label: '¥0-100' },
-  { value: '100-200', label: '¥100-200' },
-  { value: '200+', label: '¥200+' },
+  { value: '0-200', label: '¥0～200' },
+  { value: '200-300', label: '¥200～300' },
+  { value: '300+', label: '¥300+' },
 ];
 
 export default function PlanForm({ plan, onSave, onCancel }) {
