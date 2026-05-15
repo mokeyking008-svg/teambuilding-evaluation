@@ -1,10 +1,8 @@
-import { useState, useEffect, useRef, useMemo } from 'react';
-import { useUser, useRatings, useReviews, useVotes } from './hooks/useStore';
+import { useState, useEffect, useRef } from 'react';
+import { useUser, useVotes } from './hooks/useStore';
 import defaultPlans from './data/plans';
-import { ratingDimensions } from './data/plans';
 import LoginModal from './components/LoginModal';
-import StarRating from './components/StarRating';
-import RatingSection from './components/RatingSection';
+import ReviewSection from './components/ReviewSection';
 import VoteResults from './components/VoteResults';
 import AdminPanel from './components/AdminPanel';
 
@@ -63,33 +61,8 @@ function App() {
     forceRefresh();
   };
 
-  // 预创建所有方案的评分数据（从 localStorage 读取）
-  const getPlanRatingData = (planId) => {
-    const allRatings = JSON.parse(localStorage.getItem('tb_ratings') || '{}');
-    const userRatings = allRatings[planId] || {};
-    const values = Object.values(userRatings);
-
-    const getAverage = () => {
-      if (values.length === 0) return 0;
-      const dims = Object.keys(values[0]);
-      const dimAvgs = dims.map(dim => values.reduce((s, v) => s + (v[dim] || 0), 0) / values.length);
-      return dimAvgs.reduce((s, v) => s + v, 0) / dimAvgs.length;
-    };
-
-    const getDimensionAverage = (dimKey) => {
-      if (values.length === 0) return 0;
-      return values.reduce((s, v) => s + (v[dimKey] || 0), 0) / values.length;
-    };
-
-    const getRatingCount = () => values.length;
-    const getUserRating = (userId) => userRatings[userId] || null;
-
-    const updateRating = (userId, scores) => {
-      const all = JSON.parse(localStorage.getItem('tb_ratings') || '{}');
-      all[planId] = { ...all[planId], [userId]: scores };
-      localStorage.setItem('tb_ratings', JSON.stringify(all));
-    };
-
+  // 点评数据
+  const getReviewData = (planId) => {
     const allReviews = JSON.parse(localStorage.getItem('tb_reviews') || '{}');
     const planReviews = allReviews[planId] || [];
 
@@ -106,14 +79,10 @@ function App() {
 
     const getUserReview = (userId) => planReviews.find(r => r.userId === userId) || null;
 
-    return {
-      getAverage, getDimensionAverage, getRatingCount,
-      getUserRating, updateRating,
-      reviews: planReviews, addReview, getUserReview,
-    };
+    return { reviews: planReviews, addReview, getUserReview };
   };
 
-  // 一键评分数据（独立存储，与5维评分互不干扰）
+  // 一键评分数据（滑块推荐指数）
   const getQuickRatingData = (planId) => {
     const all = JSON.parse(localStorage.getItem('tb_quick_ratings') || '{}');
     const planData = all[planId] || {};
@@ -280,10 +249,8 @@ function App() {
         {filteredPlans.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 mb-8">
             {filteredPlans.map(plan => {
-              const rd = getPlanRatingData(plan.id);
               const qrd = getQuickRatingData(plan.id);
-              // 角标优先用一键评分均分，降级用5维均分
-              const avgScore = qrd.getAverage() || rd.getAverage();
+              const avgScore = qrd.getAverage();
               const voteCount = getVoteCount(plan.id);
               const userVoted = getUserVote(user?.id);
               const isVotedByMe = userVoted === plan.id;
@@ -367,7 +334,7 @@ function App() {
             onVote={handleVote}
             getUserVote={getUserVote}
             voteAnimId={voteAnimId}
-            getPlanRatingData={getPlanRatingData}
+            getReviewData={getReviewData}
             refreshKey={refreshKey}
             onRefresh={forceRefresh}
             detailRef={detailRef}
@@ -419,29 +386,19 @@ function App() {
 }
 
 // 详情弹窗组件
-function PlanDetailModal({ plan, user, onClose, onVote, getUserVote, voteAnimId, getPlanRatingData, refreshKey, onRefresh, detailRef }) {
-  // eslint-disable-next-line react-hooks/rules-of-hooks
-  const ratingsHook = useRatings(plan.id);
-  // eslint-disable-next-line react-hooks/rules-of-hooks
-  const reviewsHook = useReviews(plan.id);
+function PlanDetailModal({ plan, user, onClose, onVote, getUserVote, voteAnimId, getReviewData, refreshKey, onRefresh, detailRef }) {
+  const reviewData = getReviewData(plan.id);
 
   // eslint-disable-next-line react-hooks/rules-of-hooks
   useEffect(() => {
     // 触发重新渲染以读取最新 localStorage 数据
   }, [refreshKey]);
 
-  const avgScore = ratingsHook.getAverage();
-  const ratingCount = ratingsHook.getRatingCount();
   const userVoted = getUserVote(user?.id);
   const isVotedByMe = userVoted === plan.id;
 
-  const handleSubmitRating = (userId, scores) => {
-    ratingsHook.updateRating(userId, scores);
-    onRefresh();
-  };
-
   const handleSubmitReview = (userId, userName, userAvatar, content) => {
-    reviewsHook.addReview(userId, userName, userAvatar, content);
+    reviewData.addReview(userId, userName, userAvatar, content);
     onRefresh();
   };
 
@@ -485,41 +442,12 @@ function PlanDetailModal({ plan, user, onClose, onVote, getUserVote, voteAnimId,
               </div>
             )}
 
-            {avgScore > 0 && (
-              <div className="glass rounded-xl p-4">
-                <h3 className="text-sm font-bold text-white/80 mb-3">📊 综合评分</h3>
-                <div className="flex items-center gap-3 mb-3">
-                  <span className="text-3xl">⭐</span>
-                  <span className="text-2xl font-bold text-white">{avgScore.toFixed(1)}</span>
-                  <span className="text-sm text-white/40">({ratingCount} 人评分)</span>
-                </div>
-                <div className="space-y-2">
-                  {ratingDimensions.map(dim => {
-                    const avg = ratingsHook.getDimensionAverage(dim.key);
-                    return (
-                      <div key={dim.key} className="flex items-center justify-between">
-                        <span className="text-sm text-white/60">{dim.icon} {dim.label}</span>
-                        <div className="flex items-center gap-2">
-                          <div className="w-24 bg-white/10 rounded-full h-1.5">
-                            <div className="bg-gradient-to-r from-primary to-accent rounded-full h-1.5 transition-all duration-500" style={{ width: `${avg / 5 * 100}%` }} />
-                          </div>
-                          <span className="text-sm font-medium text-white/80 w-8 text-right">{avg.toFixed(1)}</span>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
-
-            <RatingSection
+            <ReviewSection
               user={user}
               planId={plan.id}
-              getUserRating={ratingsHook.getUserRating}
-              updateRating={handleSubmitRating}
-              getUserReview={reviewsHook.getUserReview}
+              getUserReview={reviewData.getUserReview}
               addReview={handleSubmitReview}
-              reviews={reviewsHook.reviews}
+              reviews={reviewData.reviews}
             />
 
             <button
