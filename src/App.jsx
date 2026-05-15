@@ -245,22 +245,21 @@ function App() {
           </div>
         </div>
 
-        {/* 方案卡片 - Glass */}
+        {/* 方案卡片 - 精简版 */}
         {filteredPlans.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 mb-8">
             {filteredPlans.map(plan => {
               const qrd = getQuickRatingData(plan.id);
               const avgScore = qrd.getAverage();
-              const voteCount = getVoteCount(plan.id);
               const userVoted = getUserVote(user?.id);
               const isVotedByMe = userVoted === plan.id;
 
               return (
                 <div
                   key={plan.id}
-                  className="plan-card glass rounded-2xl overflow-hidden cursor-pointer"
-                  onClick={() => toggleDetail(plan.id)}
+                  className="plan-card glass rounded-2xl overflow-hidden"
                 >
+                  {/* 封面 + 标题 + 星级角标 */}
                   <div className="relative h-40 overflow-hidden">
                     <img src={plan.cover} alt={plan.name} className="w-full h-full object-cover" loading="lazy" />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
@@ -277,39 +276,34 @@ function App() {
                       <div className="absolute top-3 left-3 bg-success text-white rounded-full px-2.5 py-1 text-xs font-bold">✓ 已投</div>
                     )}
                   </div>
+
+                  {/* 信息标签 */}
                   <div className="p-4">
-                    <div className="flex flex-wrap gap-1.5 mb-3">
+                    <div className="flex flex-wrap gap-1.5 mb-4">
                       <span className="tag-glass inline-flex items-center gap-1 text-xs text-white/70 px-2 py-1 rounded-full">📍 {plan.location}</span>
                       <span className="tag-glass inline-flex items-center gap-1 text-xs text-white/70 px-2 py-1 rounded-full">⏱️ {plan.duration}</span>
-                      <span className="tag-glass inline-flex items-center gap-1 text-xs text-white/70 px-2 py-1 rounded-full">👥 {plan.maxPeople}人</span>
+                      <span className="tag-glass inline-flex items-center gap-1 text-xs text-white/70 px-2 py-1 rounded-full">💰 ¥{plan.budgetNum}/人</span>
                     </div>
-                    <p className="text-sm text-white/60 leading-relaxed line-clamp-3">{plan.summary}</p>
 
-                    {/* 卡片上一键评分滑块 */}
-                    <CardQuickRating
-                      planId={plan.id}
-                      user={user}
-                      getQuickRatingData={getQuickRatingData}
-                      onRefresh={forceRefresh}
-                    />
-
-                    <button
-                      onClick={(e) => { e.stopPropagation(); handleVote(plan.id); }}
-                      className={`mt-3 w-full py-2.5 rounded-xl text-sm font-bold transition ${
-                        isVotedByMe
-                          ? 'glass text-success border-2 border-success/30'
-                          : 'btn-glass text-white shadow-lg'
-                      } ${voteAnimId === plan.id ? 'vote-pulse' : ''}`}
-                    >
-                      {isVotedByMe ? '✓ 已投票（点击改投）' : '🗳️ 投给这个方案'}
-                    </button>
-                    {plan.tags && plan.tags.length > 0 && (
-                      <div className="flex flex-wrap gap-1 mt-3">
-                        {plan.tags.map(tag => (
-                          <span key={tag} className="tag-glass text-xs text-white/40 px-2 py-0.5 rounded-full">#{tag}</span>
-                        ))}
-                      </div>
-                    )}
+                    {/* 底部双按钮 */}
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => toggleDetail(plan.id)}
+                        className="flex-1 py-2.5 rounded-xl text-sm font-bold glass text-white/80 hover:text-white hover:bg-white/10 transition"
+                      >
+                        查看详情
+                      </button>
+                      <button
+                        onClick={() => handleVote(plan.id)}
+                        className={`flex-1 py-2.5 rounded-xl text-sm font-bold transition ${
+                          isVotedByMe
+                            ? 'glass text-success border-2 border-success/30'
+                            : 'btn-glass text-white shadow-lg'
+                        } ${voteAnimId === plan.id ? 'vote-pulse' : ''}`}
+                      >
+                        {isVotedByMe ? '✓ 已投' : '🗳️ 投票'}
+                      </button>
+                    </div>
                   </div>
                 </div>
               );
@@ -335,6 +329,7 @@ function App() {
             getUserVote={getUserVote}
             voteAnimId={voteAnimId}
             getReviewData={getReviewData}
+            getQuickRatingData={getQuickRatingData}
             refreshKey={refreshKey}
             onRefresh={forceRefresh}
             detailRef={detailRef}
@@ -386,8 +381,9 @@ function App() {
 }
 
 // 详情弹窗组件
-function PlanDetailModal({ plan, user, onClose, onVote, getUserVote, voteAnimId, getReviewData, refreshKey, onRefresh, detailRef }) {
+function PlanDetailModal({ plan, user, onClose, onVote, getUserVote, voteAnimId, getReviewData, getQuickRatingData, refreshKey, onRefresh, detailRef }) {
   const reviewData = getReviewData(plan.id);
+  const qrd = getQuickRatingData(plan.id);
 
   // eslint-disable-next-line react-hooks/rules-of-hooks
   useEffect(() => {
@@ -429,11 +425,13 @@ function PlanDetailModal({ plan, user, onClose, onVote, getUserVote, voteAnimId,
           </div>
 
           <div className="p-4 sm:p-6 space-y-5">
+            {/* 方案详情 */}
             <div>
               <h3 className="text-base font-bold text-white/90 mb-2">📋 方案详情</h3>
               <p className="text-white/60 text-sm leading-relaxed">{plan.details || plan.summary}</p>
             </div>
 
+            {/* 标签 */}
             {plan.tags && plan.tags.length > 0 && (
               <div className="flex flex-wrap gap-2">
                 {plan.tags.map(tag => (
@@ -442,6 +440,15 @@ function PlanDetailModal({ plan, user, onClose, onVote, getUserVote, voteAnimId,
               </div>
             )}
 
+            {/* 推荐指数评分滑块 */}
+            <QuickRatingPanel
+              planId={plan.id}
+              user={user}
+              getQuickRatingData={getQuickRatingData}
+              onRefresh={onRefresh}
+            />
+
+            {/* 点评 */}
             <ReviewSection
               user={user}
               planId={plan.id}
@@ -450,6 +457,7 @@ function PlanDetailModal({ plan, user, onClose, onVote, getUserVote, voteAnimId,
               reviews={reviewData.reviews}
             />
 
+            {/* 投票按钮 */}
             <button
               onClick={() => { onVote(plan.id); onRefresh(); }}
               className={`w-full py-4 rounded-xl text-base font-bold transition ${
@@ -467,8 +475,8 @@ function PlanDetailModal({ plan, user, onClose, onVote, getUserVote, voteAnimId,
   );
 }
 
-// 卡片上一键评分滑块（推荐指数）
-function CardQuickRating({ planId, user, getQuickRatingData, onRefresh }) {
+// 详情页内推荐指数评分滑块
+function QuickRatingPanel({ planId, user, getQuickRatingData, onRefresh }) {
   const qrd = getQuickRatingData(planId);
   const avgScore = qrd.getAverage();
   const ratingCount = qrd.getRatingCount();
@@ -497,13 +505,11 @@ function CardQuickRating({ planId, user, getQuickRatingData, onRefresh }) {
     return 'text-green-400';
   };
 
-  // 滑块背景填充百分比
   const fillPercent = ((sliderVal - 1) / 4) * 100;
 
   const handleSliderChange = (e) => {
     const val = parseFloat(e.target.value);
     setSliderVal(val);
-    // 实时保存，兼容移动端（onTouchEnd 在手指滑出滑块时可能不触发）
     if (user) {
       qrd.updateScore(user.id, val);
       setJustRated(true);
@@ -513,30 +519,33 @@ function CardQuickRating({ planId, user, getQuickRatingData, onRefresh }) {
 
   const handleSliderCommit = () => {
     if (!user) return;
-    // 桌面端 onMouseUp 兜底保存（已由 onChange 实时写入，这里是幂等操作）
     qrd.updateScore(user.id, sliderVal);
     setJustRated(true);
     onRefresh();
   };
 
   return (
-    <div className="mt-4 pt-3 border-t border-white/10" onClick={e => e.stopPropagation()}>
-      <div className="flex items-center justify-between mb-2">
-        <span className="text-xs text-white/40">✨ 推荐指数</span>
+    <div className="glass rounded-xl p-4">
+      {/* 标题行 + 平均分统计 */}
+      <div className="flex items-center justify-between mb-3">
+        <span className="text-sm font-medium text-white/70">✨ 推荐指数</span>
         <div className="flex items-center gap-2">
           {ratingCount > 0 && (
-            <span className="text-xs text-white/30">{ratingCount}人评</span>
+            <span className="text-xs text-white/40">{ratingCount}人评</span>
           )}
-          {justRated && (
-            <span className={`text-lg font-bold ${getScoreColor(sliderVal)}`}>
-              {sliderVal.toFixed(1)}
-            </span>
+          {avgScore > 0 && (
+            <div className="flex items-center gap-1">
+              <span className="text-sm">⭐</span>
+              <span className={`font-bold ${avgScore >= 4 ? 'text-green-400' : avgScore >= 3 ? 'text-yellow-400' : avgScore >= 2 ? 'text-orange-400' : 'text-red-400'}`}>
+                {avgScore.toFixed(1)}
+              </span>
+            </div>
           )}
         </div>
       </div>
 
       {/* 滑块 */}
-      <div className="relative mb-1.5">
+      <div className="relative mb-2">
         <div
           className="absolute top-1/2 -translate-y-1/2 left-0 h-[6px] rounded-full pointer-events-none"
           style={{
@@ -560,15 +569,15 @@ function CardQuickRating({ planId, user, getQuickRatingData, onRefresh }) {
 
       {/* 两端标签 */}
       <div className="flex items-center justify-between">
-        <span className="text-[10px] text-white/25">不推荐</span>
+        <span className="text-xs text-white/25">不推荐</span>
         {user ? (
-          <span className={`text-[10px] ${justRated ? getScoreColor(sliderVal) : 'text-white/25'} transition-colors`}>
-            {justRated ? getScoreLabel(sliderVal) : '拖动评分'}
+          <span className={`text-xs ${justRated ? getScoreColor(sliderVal) : 'text-white/25'} transition-colors`}>
+            {justRated ? `${getScoreLabel(sliderVal)} ${sliderVal.toFixed(1)}` : '拖动评分'}
           </span>
         ) : (
-          <span className="text-[10px] text-primary/70">登录后可评分</span>
+          <span className="text-xs text-primary/70">登录后可评分</span>
         )}
-        <span className="text-[10px] text-white/25">超推荐</span>
+        <span className="text-xs text-white/25">超推荐</span>
       </div>
     </div>
   );
