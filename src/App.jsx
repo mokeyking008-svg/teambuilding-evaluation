@@ -208,9 +208,9 @@ function App() {
         )}
 
         {/* 筛选栏 */}
-        <div className="mb-6 space-y-3">
-          <div className="flex flex-wrap gap-2 items-center">
-            <span className="text-sm font-medium text-white/50">💰 预算：</span>
+        <div className="mb-6 space-y-2 sm:space-y-3">
+          <div className="flex flex-wrap gap-1.5 sm:gap-2 items-center">
+            <span className="text-xs sm:text-sm font-medium text-white/50">💰 预算：</span>
             {[
               { key: 'all', label: '全部' },
               { key: '0-100', label: '¥0-100' },
@@ -220,7 +220,7 @@ function App() {
               <button
                 key={item.key}
                 onClick={() => setFilterBudget(item.key)}
-                className={`filter-btn px-3 py-1.5 rounded-full text-sm font-medium ${
+                className={`filter-btn px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full text-xs sm:text-sm font-medium ${
                   filterBudget === item.key
                     ? 'btn-glass text-white shadow-lg'
                     : 'glass text-white/60 hover:text-white/90'
@@ -230,8 +230,8 @@ function App() {
               </button>
             ))}
           </div>
-          <div className="flex flex-wrap gap-2 items-center">
-            <span className="text-sm font-medium text-white/50">⏱️ 时长：</span>
+          <div className="flex flex-wrap gap-1.5 sm:gap-2 items-center">
+            <span className="text-xs sm:text-sm font-medium text-white/50">⏱️ 时长：</span>
             {[
               { key: 'all', label: '全部' },
               { key: '半天', label: '半天' },
@@ -241,7 +241,7 @@ function App() {
               <button
                 key={item.key}
                 onClick={() => setFilterDuration(item.key)}
-                className={`filter-btn px-3 py-1.5 rounded-full text-sm font-medium ${
+                className={`filter-btn px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full text-xs sm:text-sm font-medium ${
                   filterDuration === item.key
                     ? 'btn-glass text-white shadow-lg'
                     : 'glass text-white/60 hover:text-white/90'
@@ -255,7 +255,7 @@ function App() {
 
         {/* 方案卡片 - Glass */}
         {filteredPlans.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 mb-8">
             {filteredPlans.map(plan => {
               const rd = getPlanRatingData(plan.id);
               const avgScore = rd.getAverage();
@@ -426,19 +426,19 @@ function PlanDetailModal({ plan, user, onClose, onVote, getUserVote, voteAnimId,
     <div className="fixed inset-0 z-50 overflow-y-auto bg-black/60 modal-overlay" onClick={onClose}>
       <div className="min-h-full flex items-start justify-center py-8 px-4" onClick={e => e.stopPropagation()}>
         <div className="glass-solid rounded-2xl shadow-2xl w-full max-w-2xl relative" ref={detailRef}>
-          <div className="relative h-56 sm:h-64 overflow-hidden rounded-t-2xl">
+          <div className="relative h-48 sm:h-64 overflow-hidden rounded-t-2xl">
             <img src={plan.cover} alt={plan.name} className="w-full h-full object-cover" />
             <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
             <button
               onClick={onClose}
-              className="absolute top-4 right-4 w-10 h-10 glass-solid rounded-full flex items-center justify-center text-white/80 hover:text-white hover:bg-white/20 transition"
+              className="absolute top-3 right-3 sm:top-4 sm:right-4 w-9 h-9 sm:w-10 sm:h-10 glass-solid rounded-full flex items-center justify-center text-white/80 hover:text-white hover:bg-white/20 transition"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12"/>
               </svg>
             </button>
-            <div className="absolute bottom-6 left-6 right-6">
-              <h2 className="text-white font-bold text-2xl mb-2">{plan.name}</h2>
+            <div className="absolute bottom-4 left-4 right-4 sm:bottom-6 sm:left-6 sm:right-6">
+              <h2 className="text-white font-bold text-xl sm:text-2xl mb-2">{plan.name}</h2>
               <div className="flex flex-wrap gap-2">
                 <span className="glass-solid text-white/90 text-xs px-3 py-1 rounded-full">📍 {plan.location}</span>
                 <span className="glass-solid text-white/90 text-xs px-3 py-1 rounded-full">⏱️ {plan.duration}</span>
@@ -448,7 +448,7 @@ function PlanDetailModal({ plan, user, onClose, onVote, getUserVote, voteAnimId,
             </div>
           </div>
 
-          <div className="p-6 space-y-6">
+          <div className="p-4 sm:p-6 space-y-5">
             <div>
               <h3 className="text-base font-bold text-white/90 mb-2">📋 方案详情</h3>
               <p className="text-white/60 text-sm leading-relaxed">{plan.details || plan.summary}</p>
@@ -577,7 +577,7 @@ function CardRatingBar({ planId, user, expanded, onToggle, getPlanRatingData, on
           ) : (
             ratingDimensions.map(dim => (
               <div key={dim.key} className="flex items-center justify-between">
-                <span className="text-white/50 text-xs min-w-[72px]">{dim.icon} {dim.label}</span>
+                <span className="text-white/50 text-xs min-w-[60px] sm:min-w-[72px]">{dim.icon} {dim.label}</span>
                 <StarRating
                   value={scores[dim.key]}
                   onChange={(val) => handleQuickRate(dim.key, val)}

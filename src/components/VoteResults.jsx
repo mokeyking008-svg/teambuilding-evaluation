@@ -80,7 +80,7 @@ export default function VoteResults({ plans, getVoteCount, getTotalVotes, votes 
                   )}
                 </span>
               </div>
-              <div className="w-full bg-white/10 rounded-full h-6 overflow-hidden">
+              <div className="w-full bg-white/10 rounded-full h-4 sm:h-6 overflow-hidden">
                 <div
                   className={`h-full rounded-full transition-all duration-700 ease-out flex items-center justify-end pr-2 ${
                     idx === 0 && maxVotes > 0

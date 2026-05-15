@@ -77,23 +77,39 @@ body {
   animation: slideDown 0.25s ease-out;
 }
 
-/* Glass card hover */
-.plan-card {
-  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s ease;
-}
-.plan-card:hover {
-  transform: translateY(-6px) scale(1.01);
-  box-shadow:
-    0 20px 40px rgba(0, 0, 0, 0.3),
-    0 0 30px rgba(102, 126, 234, 0.1);
+/* Glass card hover - disabled on touch devices */
+@media (hover: hover) {
+  .plan-card:hover {
+    transform: translateY(-6px) scale(1.01);
+    box-shadow:
+      0 20px 40px rgba(0, 0, 0, 0.3),
+      0 0 30px rgba(102, 126, 234, 0.1);
+  }
 }
 
-/* Smooth transitions */
+/* Glass hover glow - disabled on touch */
+@media (hover: hover) {
+  .glass-hover:hover {
+    background: rgba(255, 255, 255, 0.12);
+    box-shadow: 0 0 20px rgba(102, 126, 234, 0.15);
+  }
+}
+
+/* Mobile: make admin actions always visible (no hover) */
+@media (max-width: 639px) {
+  .admin-actions {
+    opacity: 1 !important;
+  }
+}
+
+/* Smooth transitions - hover only on pointer devices */
+@media (hover: hover) {
+  .filter-btn:hover {
+    transform: translateY(-1px);
+  }
+}
 .filter-btn {
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-.filter-btn:hover {
-  transform: translateY(-1px);
 }
 
 /* Modal overlay - stronger blur for glass */
@@ -121,10 +137,6 @@ body {
 /* Glass hover glow */
 .glass-hover {
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-.glass-hover:hover {
-  background: rgba(255, 255, 255, 0.12);
-  box-shadow: 0 0 20px rgba(102, 126, 234, 0.15);
 }
 
 /* Gradient button */

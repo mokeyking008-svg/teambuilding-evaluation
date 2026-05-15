@@ -187,7 +187,7 @@ export default function AdminPanel({ plans, onSavePlans, onExit }) {
                     <span>💰 ¥{plan.budgetNum}/人</span>
                   </div>
                 </div>
-                <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition">
+                <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition admin-actions">
                   <button
                     onClick={() => setEditingPlan(plan)}
                     className="p-2 text-white/40 hover:text-primary hover:bg-primary/10 rounded-lg transition"
