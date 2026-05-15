@@ -1,5 +1,9 @@
 import { useState } from 'react';
 import PlanForm from './PlanForm';
+import {
+  Lock, Settings, Plus, X, Pencil, Trash2,
+  Inbox, AlertTriangle, Check, CheckCircle,
+} from 'lucide-react';
 
 const ADMIN_PASSWORD = 'admin2025';
 
@@ -29,14 +33,14 @@ export default function AdminPanel({ plans, onSavePlans, onExit }) {
     const updated = [...plans, planData];
     onSavePlans(updated);
     setEditingPlan(null);
-    showToast('✅ 方案添加成功！');
+    showToast('方案添加成功！');
   };
 
   const handleEdit = (planData) => {
     const updated = plans.map(p => p.id === planData.id ? planData : p);
     onSavePlans(updated);
     setEditingPlan(null);
-    showToast('✅ 方案修改成功！');
+    showToast('方案修改成功！');
   };
 
   const handleDelete = (planId) => {
@@ -56,7 +60,7 @@ export default function AdminPanel({ plans, onSavePlans, onExit }) {
 
     onSavePlans(updated);
     setDeleteConfirm(null);
-    showToast('🗑️ 方案已删除');
+    showToast('方案已删除');
   };
 
   // 密码验证界面
@@ -66,7 +70,7 @@ export default function AdminPanel({ plans, onSavePlans, onExit }) {
         <div className="glass-solid rounded-2xl shadow-2xl w-[90vw] max-w-sm p-6 mx-4" onClick={e => e.stopPropagation()}>
           <div className="text-center mb-5">
             <div className="inline-flex items-center justify-center w-14 h-14 glass rounded-full mb-3">
-              <span className="text-2xl">🔐</span>
+              <Lock className="w-6 h-6 text-accent" />
             </div>
             <h2 className="text-xl font-bold text-white">管理员验证</h2>
             <p className="text-sm text-white/50 mt-1">请输入管理员密码</p>
@@ -107,16 +111,18 @@ export default function AdminPanel({ plans, onSavePlans, onExit }) {
         <div className="min-h-full flex items-start justify-center py-8 px-4" onClick={onExit}>
           <div className="glass-solid rounded-2xl shadow-2xl w-full max-w-lg relative" onClick={e => e.stopPropagation()}>
             <div className="p-6 border-b border-white/10 flex items-center justify-between">
-              <h2 className="text-lg font-bold text-white">
-                {editingPlan === 'new' ? '➕ 新增方案' : '✏️ 编辑方案'}
+              <h2 className="text-lg font-bold text-white flex items-center gap-2">
+                {editingPlan === 'new' ? (
+                  <><Plus className="w-5 h-5 text-accent" /> 新增方案</>
+                ) : (
+                  <><Pencil className="w-5 h-5 text-accent" /> 编辑方案</>
+                )}
               </h2>
               <button
                 onClick={() => setEditingPlan(null)}
                 className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-white/10 transition text-white/40"
               >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12"/>
-                </svg>
+                <X className="w-5 h-5" />
               </button>
             </div>
             <div className="p-6">
@@ -139,15 +145,17 @@ export default function AdminPanel({ plans, onSavePlans, onExit }) {
         <div className="glass-solid rounded-2xl shadow-2xl w-full max-w-2xl relative">
           {/* Toast */}
           {toast && (
-            <div className="fixed top-6 left-1/2 -translate-x-1/2 z-[60] bg-success text-white px-6 py-3 rounded-full shadow-lg font-medium text-sm">
-              {toast}
+            <div className="fixed top-6 left-1/2 -translate-x-1/2 z-[60] bg-success text-white px-6 py-3 rounded-full shadow-lg font-medium text-sm flex items-center gap-2">
+              <Check className="w-4 h-4" /> {toast}
             </div>
           )}
 
           {/* Header */}
           <div className="p-6 border-b border-white/10 flex items-center justify-between">
             <div>
-              <h2 className="text-lg font-bold text-white">⚙️ 方案管理</h2>
+              <h2 className="text-lg font-bold text-white flex items-center gap-2">
+                <Settings className="w-5 h-5 text-accent" /> 方案管理
+              </h2>
               <p className="text-sm text-white/50 mt-0.5">共 {plans.length} 个方案</p>
             </div>
             <div className="flex items-center gap-2">
@@ -155,18 +163,14 @@ export default function AdminPanel({ plans, onSavePlans, onExit }) {
                 onClick={() => setEditingPlan('new')}
                 className="flex items-center gap-1.5 px-4 py-2 btn-glass text-white text-sm font-bold rounded-xl shadow-lg"
               >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4"/>
-                </svg>
+                <Plus className="w-4 h-4" />
                 新增
               </button>
               <button
                 onClick={onExit}
                 className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-white/10 transition text-white/40"
               >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12"/>
-                </svg>
+                <X className="w-5 h-5" />
               </button>
             </div>
           </div>
@@ -182,8 +186,9 @@ export default function AdminPanel({ plans, onSavePlans, onExit }) {
                 <div className="flex-1 min-w-0">
                   <p className="font-medium text-white/80 text-sm truncate">{plan.name}</p>
                   <div className="flex items-center gap-2 text-xs text-white/35 mt-0.5">
-                    <span>📍 {plan.location}</span>
-                    <span>💰 ¥{plan.budgetNum}/人</span>
+                    <span>{plan.location}</span>
+                    <span>·</span>
+                    <span>¥{plan.budgetNum}/人</span>
                   </div>
                 </div>
                 <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition admin-actions">
@@ -192,25 +197,21 @@ export default function AdminPanel({ plans, onSavePlans, onExit }) {
                     className="p-2 text-white/40 hover:text-primary hover:bg-primary/10 rounded-lg transition"
                     title="编辑"
                   >
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
-                    </svg>
+                    <Pencil className="w-4 h-4" />
                   </button>
                   <button
                     onClick={() => setDeleteConfirm(plan.id)}
                     className="p-2 text-white/40 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition"
                     title="删除"
                   >
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
-                    </svg>
+                    <Trash2 className="w-4 h-4" />
                   </button>
                 </div>
               </div>
             ))}
             {plans.length === 0 && (
               <div className="text-center py-12">
-                <span className="text-4xl">📭</span>
+                <Inbox className="w-12 h-12 text-white/20 mx-auto" />
                 <p className="text-white/30 mt-2">暂无方案，点击上方按钮新增</p>
               </div>
             )}
@@ -224,7 +225,7 @@ export default function AdminPanel({ plans, onSavePlans, onExit }) {
           <div className="glass-solid rounded-2xl shadow-2xl w-[90vw] max-w-sm p-6 mx-4" onClick={e => e.stopPropagation()}>
             <div className="text-center mb-4">
               <div className="inline-flex items-center justify-center w-14 h-14 bg-red-500/10 rounded-full mb-3">
-                <span className="text-2xl">⚠️</span>
+                <AlertTriangle className="w-7 h-7 text-red-400" />
               </div>
               <h3 className="text-lg font-bold text-white">确认删除？</h3>
               <p className="text-sm text-white/50 mt-1">删除后该方案的评分、点评和投票数据将一并清除，此操作不可恢复。</p>
@@ -238,9 +239,9 @@ export default function AdminPanel({ plans, onSavePlans, onExit }) {
               </button>
               <button
                 onClick={() => handleDelete(deleteConfirm)}
-                className="flex-1 py-3 bg-red-500 text-white font-bold rounded-xl hover:bg-red-600 transition"
+                className="flex-1 py-3 bg-red-500 text-white font-bold rounded-xl hover:bg-red-600 transition flex items-center justify-center gap-1.5"
               >
-                确认删除
+                <Trash2 className="w-4 h-4" /> 确认删除
               </button>
             </div>
           </div>

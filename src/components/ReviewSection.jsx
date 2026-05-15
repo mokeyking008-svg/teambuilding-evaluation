@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { MessageSquare, PenLine, Users, PartyPopper } from 'lucide-react';
 
 export default function ReviewSection({ user, planId, getUserReview, addReview, reviews }) {
   const existingReview = getUserReview(user?.id);
@@ -9,7 +10,9 @@ export default function ReviewSection({ user, planId, getUserReview, addReview, 
   if (!user) {
     return (
       <div className="glass rounded-xl p-5 text-center">
-        <p className="text-primary font-medium">🎉 登录后即可点评</p>
+        <p className="text-primary font-medium flex items-center justify-center gap-1.5">
+          <PartyPopper className="w-4 h-4" /> 登录后即可点评
+        </p>
       </div>
     );
   }
@@ -31,14 +34,16 @@ export default function ReviewSection({ user, planId, getUserReview, addReview, 
       {/* 成功提示 */}
       {showSuccess && (
         <div className="fixed top-6 left-1/2 -translate-x-1/2 z-50 bg-success text-white px-6 py-3 rounded-full shadow-lg font-medium text-sm animate-bounce">
-          ✓ 提交成功！
+          提交成功！
         </div>
       )}
 
       {/* 写点评 */}
       {!submitted ? (
         <div className="glass rounded-xl p-5">
-          <h3 className="text-base font-bold text-white/90 mb-3">💬 写点什么吧</h3>
+          <h3 className="text-base font-bold text-white/90 mb-3 flex items-center gap-2">
+            <MessageSquare className="w-4 h-4 text-accent" /> 写点什么吧
+          </h3>
           <textarea
             value={reviewText}
             onChange={e => setReviewText(e.target.value)}
@@ -56,7 +61,9 @@ export default function ReviewSection({ user, planId, getUserReview, addReview, 
       ) : (
         <div className="glass rounded-xl p-5 border border-success/20">
           <div className="flex items-center justify-between mb-2">
-            <h3 className="text-base font-bold text-white/90">📝 我的点评</h3>
+            <h3 className="text-base font-bold text-white/90 flex items-center gap-2">
+              <PenLine className="w-4 h-4 text-accent" /> 我的点评
+            </h3>
             <button
               onClick={handleModify}
               className="text-sm text-primary hover:text-primary-light font-medium transition"
@@ -71,7 +78,9 @@ export default function ReviewSection({ user, planId, getUserReview, addReview, 
       {/* 点评列表 */}
       {reviews.length > 0 && (
         <div className="space-y-3">
-          <h3 className="text-base font-bold text-white/90">🗣️ 大家怎么说</h3>
+          <h3 className="text-base font-bold text-white/90 flex items-center gap-2">
+            <Users className="w-4 h-4 text-accent" /> 大家怎么说
+          </h3>
           {reviews.map((review, idx) => (
             <div key={idx} className="glass glass-hover rounded-xl p-4">
               <div className="flex items-center gap-3 mb-2">

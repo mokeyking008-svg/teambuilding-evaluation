@@ -1,4 +1,5 @@
 import { useMemo } from 'react';
+import { BarChart3, Star, Trophy, Medal, Award } from 'lucide-react';
 
 export default function VoteResults({ plans, getVoteCount, getTotalVotes, votes, refreshKey }) {
   const totalVotes = getTotalVotes();
@@ -57,7 +58,7 @@ export default function VoteResults({ plans, getVoteCount, getTotalVotes, votes,
       {/* 投票柱状图 */}
       <div>
         <h3 className="text-lg font-bold text-white/90 mb-4 flex items-center gap-2">
-          <span className="text-2xl">📊</span> 投票结果
+          <BarChart3 className="w-5 h-5 text-accent" /> 投票结果
         </h3>
         <div className="glass rounded-xl p-5 space-y-4">
           {voteRanking.map((plan, idx) => (
@@ -65,7 +66,9 @@ export default function VoteResults({ plans, getVoteCount, getTotalVotes, votes,
               <div className="flex items-center justify-between mb-1.5">
                 <div className="flex items-center gap-2">
                   {idx === 0 && maxVotes > 0 && (
-                    <span className="bg-accent/20 text-accent text-xs font-bold px-2 py-0.5 rounded-full">👑 领先</span>
+                    <span className="bg-accent/20 text-accent text-xs font-bold px-2 py-0.5 rounded-full flex items-center gap-1">
+                      <Trophy className="w-3 h-3" /> 领先
+                    </span>
                   )}
                   <span className="font-medium text-white/80 text-sm truncate max-w-[200px] sm:max-w-none">{plan.name}</span>
                 </div>
@@ -101,7 +104,7 @@ export default function VoteResults({ plans, getVoteCount, getTotalVotes, votes,
       {/* 评分排名 */}
       <div>
         <h3 className="text-lg font-bold text-white/90 mb-4 flex items-center gap-2">
-          <span className="text-2xl">⭐</span> 评分排名
+          <Star className="w-5 h-5 text-accent" /> 评分排名
         </h3>
         <div className="glass rounded-xl overflow-hidden">
           {ratingRanking.map((plan, idx) => (
@@ -112,14 +115,22 @@ export default function VoteResults({ plans, getVoteCount, getTotalVotes, votes,
               }`}
             >
               <span className="text-2xl font-bold w-8 text-center">
-                {idx === 0 && plan.avgRating > 0 ? '🥇' : idx === 1 && plan.avgRating > 0 ? '🥈' : idx === 2 && plan.avgRating > 0 ? '🥉' : `${idx + 1}`}
+                {idx === 0 && plan.avgRating > 0 ? (
+                  <Award className="w-7 h-7 text-amber-400 mx-auto" />
+                ) : idx === 1 && plan.avgRating > 0 ? (
+                  <Medal className="w-6 h-6 text-gray-300 mx-auto" />
+                ) : idx === 2 && plan.avgRating > 0 ? (
+                  <Medal className="w-6 h-6 text-amber-600 mx-auto" />
+                ) : (
+                  <span className="text-white/40">{idx + 1}</span>
+                )}
               </span>
               <div className="flex-1 min-w-0">
                 <p className="font-medium text-white/80 text-sm truncate">{plan.name}</p>
                 <p className="text-xs text-white/30">{plan.ratingCount} 人评分</p>
               </div>
               <div className="flex items-center gap-1.5">
-                <span className="text-lg">⭐</span>
+                <Star className="w-4 h-4 text-star fill-star" />
                 <span className="font-bold text-lg text-white/90">{plan.avgRating > 0 ? plan.avgRating.toFixed(1) : '-'}</span>
               </div>
             </div>

@@ -5,6 +5,11 @@ import LoginModal from './components/LoginModal';
 import ReviewSection from './components/ReviewSection';
 import VoteResults from './components/VoteResults';
 import AdminPanel from './components/AdminPanel';
+import {
+  Tent, Settings, LogIn, Vote, ChevronDown, SearchX,
+  MapPin, Clock, Coins, Star, Trophy, X, FileText,
+  Sparkles, CheckCircle, ThumbsUp,
+} from 'lucide-react';
 
 // 方案存储 key
 const PLANS_KEY = 'tb_plans';
@@ -144,7 +149,7 @@ function App() {
       <header className="sticky top-0 z-40 nav-glass">
         <div className="max-w-5xl mx-auto px-4 h-14 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <span className="text-2xl">🏕️</span>
+            <Tent className="w-6 h-6 text-accent" />
             <h1 className="text-lg font-bold gradient-text hidden sm:block">
               数字化平台中心 · 团建方案投票
             </h1>
@@ -156,10 +161,7 @@ function App() {
               className="flex items-center gap-1.5 px-3 py-1.5 text-white/50 hover:text-white/80 hover:bg-white/5 text-sm rounded-lg transition"
               title="管理方案"
             >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-              </svg>
+              <Settings className="w-4 h-4" />
               <span className="hidden sm:inline">管理</span>
             </button>
 
@@ -174,10 +176,7 @@ function App() {
                 onClick={() => setShowLogin(true)}
                 className="btn-glass flex items-center gap-1.5 px-4 py-1.5 text-white text-sm font-medium rounded-full"
               >
-                <svg viewBox="0 0 24 24" className="w-4 h-4" fill="currentColor">
-                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/>
-                  <circle cx="12" cy="12" r="2"/>
-                </svg>
+                <LogIn className="w-4 h-4" />
                 登录
               </button>
             )}
@@ -189,7 +188,7 @@ function App() {
         {/* 投票进度 - Glass */}
         {totalVotes > 0 && (
           <div className="mb-6 glass-solid rounded-2xl p-4 flex items-center gap-3">
-            <span className="text-2xl">🗳️</span>
+            <Vote className="w-7 h-7 text-accent flex-shrink-0" />
             <div className="flex-1">
               <p className="text-sm font-medium text-white/90">
                 共 <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-accent font-bold text-lg">{totalVotes}</span> 人参与投票
@@ -202,7 +201,8 @@ function App() {
         {/* 筛选栏 */}
         <div className="mb-6 space-y-2 sm:space-y-3">
           <div className="flex flex-wrap gap-1.5 sm:gap-2 items-center">
-            <span className="text-xs sm:text-sm font-medium text-white/50">💰 人均预算：</span>
+            <Coins className="w-3.5 h-3.5 text-white/40 flex-shrink-0" />
+            <span className="text-xs sm:text-sm font-medium text-white/50">人均预算：</span>
             {[
               { key: 'all', label: '全部' },
               { key: '0-200', label: '¥0～200' },
@@ -223,7 +223,8 @@ function App() {
             ))}
           </div>
           <div className="flex flex-wrap gap-1.5 sm:gap-2 items-center">
-            <span className="text-xs sm:text-sm font-medium text-white/50">⏱️ 团建时长：</span>
+            <Clock className="w-3.5 h-3.5 text-white/40 flex-shrink-0" />
+            <span className="text-xs sm:text-sm font-medium text-white/50">团建时长：</span>
             {[
               { key: 'all', label: '全部' },
               { key: '0.5天', label: '0.5天' },
@@ -268,28 +269,36 @@ function App() {
                     </div>
                     {avgScore > 0 && (
                       <div className="absolute top-3 right-3 glass-solid rounded-full px-2.5 py-1 flex items-center gap-1">
-                        <span className="text-sm">⭐</span>
+                        <Star className="w-3.5 h-3.5 text-star fill-star" />
                         <span className="font-bold text-sm text-white">{avgScore.toFixed(1)}</span>
                       </div>
                     )}
                     {isVotedByMe && (
-                      <div className="absolute top-3 left-3 bg-success text-white rounded-full px-2.5 py-1 text-xs font-bold">✓ 已投</div>
+                      <div className="absolute top-3 left-3 bg-success text-white rounded-full px-2.5 py-1 text-xs font-bold flex items-center gap-1">
+                        <CheckCircle className="w-3.5 h-3.5" /> 已投
+                      </div>
                     )}
                   </div>
 
                   {/* 信息标签 */}
                   <div className="p-4">
                     <div className="flex flex-wrap gap-1.5 mb-4">
-                      <span className="tag-glass inline-flex items-center gap-1 text-xs text-white/70 px-2 py-1 rounded-full">📍 {plan.location}</span>
-                      <span className="tag-glass inline-flex items-center gap-1 text-xs text-white/70 px-2 py-1 rounded-full">⏱️ {plan.duration}</span>
-                      <span className="tag-glass inline-flex items-center gap-1 text-xs text-white/70 px-2 py-1 rounded-full">💰 ¥{plan.budgetNum}/人</span>
+                      <span className="tag-glass inline-flex items-center gap-1 text-xs text-white/70 px-2 py-1 rounded-full">
+                        <MapPin className="w-3 h-3 flex-shrink-0" /> {plan.location}
+                      </span>
+                      <span className="tag-glass inline-flex items-center gap-1 text-xs text-white/70 px-2 py-1 rounded-full">
+                        <Clock className="w-3 h-3 flex-shrink-0" /> {plan.duration}
+                      </span>
+                      <span className="tag-glass inline-flex items-center gap-1 text-xs text-white/70 px-2 py-1 rounded-full">
+                        <Coins className="w-3 h-3 flex-shrink-0" /> ¥{plan.budgetNum}/人
+                      </span>
                     </div>
 
-                    {/* 底部双按钮 */}
+                    {/* 底部双按钮 - 投票为主 CTA */}
                     <div className="flex gap-2">
                       <button
                         onClick={() => toggleDetail(plan.id)}
-                        className="flex-1 py-2.5 rounded-xl text-sm font-bold glass text-white/80 hover:text-white hover:bg-white/10 transition"
+                        className="flex-1 py-2.5 rounded-xl text-sm font-medium text-white/50 hover:text-white/80 hover:bg-white/5 transition border border-white/10"
                       >
                         查看详情
                       </button>
@@ -297,11 +306,15 @@ function App() {
                         onClick={() => handleVote(plan.id)}
                         className={`flex-1 py-2.5 rounded-xl text-sm font-bold transition ${
                           isVotedByMe
-                            ? 'glass text-success border-2 border-success/30'
+                            ? 'bg-success/15 text-success border-2 border-success/30'
                             : 'btn-glass text-white shadow-lg'
                         } ${voteAnimId === plan.id ? 'vote-pulse' : ''}`}
                       >
-                        {isVotedByMe ? '✓ 已投' : '🗳️ 投票'}
+                        {isVotedByMe ? (
+                          <span className="flex items-center justify-center gap-1"><CheckCircle className="w-4 h-4" /> 已投</span>
+                        ) : (
+                          <span className="flex items-center justify-center gap-1"><ThumbsUp className="w-4 h-4" /> 投票</span>
+                        )}
                       </button>
                     </div>
                   </div>
@@ -311,7 +324,7 @@ function App() {
           </div>
         ) : (
           <div className="text-center py-16">
-            <span className="text-6xl">🔍</span>
+            <SearchX className="w-16 h-16 text-white/20 mx-auto" />
             <p className="text-white/40 mt-4 text-lg">没有找到匹配的方案</p>
             <button onClick={() => { setFilterBudget('all'); setFilterDuration('all'); }} className="mt-3 text-primary hover:text-primary-light text-sm font-medium transition">
               清除筛选
@@ -343,15 +356,13 @@ function App() {
             className="w-full glass glass-hover rounded-2xl p-5 flex items-center justify-between group"
           >
             <div className="flex items-center gap-3">
-              <span className="text-2xl">🏆</span>
+              <Trophy className="w-6 h-6 text-accent" />
               <div className="text-left">
                 <h2 className="text-lg font-bold text-white/90 group-hover:text-white transition">查看投票结果</h2>
                 <p className="text-sm text-white/40">票数统计与评分排名</p>
               </div>
             </div>
-            <svg className={`w-5 h-5 text-white/40 transition-transform ${showResults ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7"/>
-            </svg>
+            <ChevronDown className={`w-5 h-5 text-white/40 transition-transform ${showResults ? 'rotate-180' : ''}`} />
           </button>
           {showResults && (
             <div className="mt-4">
@@ -409,16 +420,20 @@ function PlanDetailModal({ plan, user, onClose, onVote, getUserVote, voteAnimId,
               onClick={onClose}
               className="absolute top-3 right-3 sm:top-4 sm:right-4 w-9 h-9 sm:w-10 sm:h-10 glass-solid rounded-full flex items-center justify-center text-white/80 hover:text-white hover:bg-white/20 transition"
             >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12"/>
-              </svg>
+              <X className="w-5 h-5" />
             </button>
             <div className="absolute bottom-4 left-4 right-4 sm:bottom-6 sm:left-6 sm:right-6">
               <h2 className="text-white font-bold text-xl sm:text-2xl mb-2">{plan.name}</h2>
               <div className="flex flex-wrap gap-2">
-                <span className="glass-solid text-white/90 text-xs px-3 py-1 rounded-full">📍 {plan.location}</span>
-                <span className="glass-solid text-white/90 text-xs px-3 py-1 rounded-full">⏱️ {plan.duration}</span>
-                <span className="glass-solid text-white/90 text-xs px-3 py-1 rounded-full">💰 ¥{plan.budgetNum}/人</span>
+                <span className="tag-glass text-white/90 text-xs px-3 py-1 rounded-full inline-flex items-center gap-1">
+                  <MapPin className="w-3 h-3" /> {plan.location}
+                </span>
+                <span className="tag-glass text-white/90 text-xs px-3 py-1 rounded-full inline-flex items-center gap-1">
+                  <Clock className="w-3 h-3" /> {plan.duration}
+                </span>
+                <span className="tag-glass text-white/90 text-xs px-3 py-1 rounded-full inline-flex items-center gap-1">
+                  <Coins className="w-3 h-3" /> ¥{plan.budgetNum}/人
+                </span>
               </div>
             </div>
           </div>
@@ -426,7 +441,9 @@ function PlanDetailModal({ plan, user, onClose, onVote, getUserVote, voteAnimId,
           <div className="p-4 sm:p-6 space-y-5">
             {/* 方案详情 */}
             <div>
-              <h3 className="text-base font-bold text-white/90 mb-2">📋 方案详情</h3>
+              <h3 className="text-base font-bold text-white/90 mb-2 flex items-center gap-2">
+                <FileText className="w-4 h-4 text-accent" /> 方案详情
+              </h3>
               <p className="text-white/60 text-sm leading-relaxed">{plan.details || plan.summary}</p>
             </div>
 
@@ -461,11 +478,15 @@ function PlanDetailModal({ plan, user, onClose, onVote, getUserVote, voteAnimId,
               onClick={() => { onVote(plan.id); onRefresh(); }}
               className={`w-full py-4 rounded-xl text-base font-bold transition ${
                 isVotedByMe
-                  ? 'glass text-success border-2 border-success/30'
+                  ? 'bg-success/15 text-success border-2 border-success/30'
                   : 'btn-glass text-white shadow-xl hover:shadow-2xl active:scale-[0.98]'
               } ${voteAnimId === plan.id ? 'vote-pulse' : ''}`}
             >
-              {isVotedByMe ? '✓ 已投票（点击改投其他方案）' : '🗳️ 投票支持这个方案！'}
+              {isVotedByMe ? (
+                <span className="flex items-center justify-center gap-2"><CheckCircle className="w-5 h-5" /> 已投票（点击改投其他方案）</span>
+              ) : (
+                <span className="flex items-center justify-center gap-2"><ThumbsUp className="w-5 h-5" /> 投票支持这个方案！</span>
+              )}
             </button>
           </div>
         </div>
@@ -527,14 +548,16 @@ function QuickRatingPanel({ planId, user, getQuickRatingData, onRefresh }) {
     <div className="glass rounded-xl p-4">
       {/* 标题行 + 平均分统计 */}
       <div className="flex items-center justify-between mb-3">
-        <span className="text-sm font-medium text-white/70">✨ 推荐指数</span>
+        <span className="text-sm font-medium text-white/70 flex items-center gap-1.5">
+          <Sparkles className="w-4 h-4 text-accent" /> 推荐指数
+        </span>
         <div className="flex items-center gap-2">
           {ratingCount > 0 && (
             <span className="text-xs text-white/40">{ratingCount}人评</span>
           )}
           {avgScore > 0 && (
             <div className="flex items-center gap-1">
-              <span className="text-sm">⭐</span>
+              <Star className="w-3.5 h-3.5 text-star fill-star" />
               <span className={`font-bold ${avgScore >= 4 ? 'text-green-400' : avgScore >= 3 ? 'text-yellow-400' : avgScore >= 2 ? 'text-orange-400' : 'text-red-400'}`}>
                 {avgScore.toFixed(1)}
               </span>

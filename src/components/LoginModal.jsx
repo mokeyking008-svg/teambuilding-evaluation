@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { UserCircle, LogIn } from 'lucide-react';
 
 export default function LoginModal({ onLogin, onClose }) {
   const [name, setName] = useState('');
@@ -41,10 +42,7 @@ export default function LoginModal({ onLogin, onClose }) {
         {/* 头像 + 标题 */}
         <div className="text-center mb-5">
           <div className="inline-flex items-center justify-center w-16 h-16 rounded-full mb-3 btn-glass">
-            <svg viewBox="0 0 24 24" className="w-9 h-9 text-white" fill="currentColor">
-              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/>
-              <circle cx="12" cy="12" r="2"/>
-            </svg>
+            <UserCircle className="w-9 h-9 text-white" />
           </div>
           <h2 className="text-xl font-bold text-white">登录</h2>
           <p className="text-sm text-white/50 mt-1">输入你的姓名即可参与投票</p>
@@ -80,9 +78,9 @@ export default function LoginModal({ onLogin, onClose }) {
         {/* 登录按钮 */}
         <button
           onClick={handleSubmit}
-          className="w-full py-3 btn-glass text-white font-medium rounded-xl shadow-lg"
+          className="w-full py-3 btn-glass text-white font-medium rounded-xl shadow-lg flex items-center justify-center gap-2"
         >
-          进入
+          <LogIn className="w-4 h-4" /> 进入
         </button>
 
         <button

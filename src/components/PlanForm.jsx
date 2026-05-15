@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import CoverPicker from './CoverPicker';
+import { Save, Plus, ImageIcon, Link, X, Check } from 'lucide-react';
 
 const emptyForm = {
   name: '',
@@ -205,9 +206,9 @@ export default function PlanForm({ plan, onSave, onCancel }) {
       <div className="flex gap-3 pt-2">
         <button
           type="submit"
-          className="flex-1 py-3 btn-glass text-white font-bold rounded-xl shadow-lg"
+          className="flex-1 py-3 btn-glass text-white font-bold rounded-xl shadow-lg flex items-center justify-center gap-2"
         >
-          {plan ? '💾 保存修改' : '➕ 添加方案'}
+          {plan ? <><Save className="w-4 h-4" /> 保存修改</> : <><Plus className="w-4 h-4" /> 添加方案</>}
         </button>
         <button
           type="button"
