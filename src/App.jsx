@@ -44,7 +44,7 @@ function App() {
   const [ratingCardId, setRatingCardId] = useState(null); // 当前展开评分的卡片
   const [filterBudget, setFilterBudget] = useState('all');
   const [filterDuration, setFilterDuration] = useState('all');
-  const [showResults, setShowResults] = useState(false);
+  const [showResults, setShowResults] = useState(true);
   const [voteAnimId, setVoteAnimId] = useState(null);
   const [refreshKey, setRefreshKey] = useState(0);
   const detailRef = useRef(null);
