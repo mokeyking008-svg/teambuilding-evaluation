@@ -116,7 +116,14 @@ function App() {
 
   // 过滤方案
   const filteredPlans = plans.filter(plan => {
-    if (filterBudget !== 'all' && plan.budget !== filterBudget) return false;
+    // 预算：按 budgetNum 范围筛选
+    if (filterBudget !== 'all') {
+      const num = plan.budgetNum || 0;
+      if (filterBudget === '0-200' && (num < 0 || num > 200)) return false;
+      if (filterBudget === '200-300' && (num < 200 || num > 300)) return false;
+      if (filterBudget === '300+' && num < 300) return false;
+    }
+    // 时长：精确匹配
     if (filterDuration !== 'all' && plan.duration !== filterDuration) return false;
     return true;
   });
@@ -210,12 +217,12 @@ function App() {
         {/* 筛选栏 */}
         <div className="mb-6 space-y-2 sm:space-y-3">
           <div className="flex flex-wrap gap-1.5 sm:gap-2 items-center">
-            <span className="text-xs sm:text-sm font-medium text-white/50">💰 预算：</span>
+            <span className="text-xs sm:text-sm font-medium text-white/50">💰 人均预算：</span>
             {[
               { key: 'all', label: '全部' },
-              { key: '0-100', label: '¥0-100' },
-              { key: '100-200', label: '¥100-200' },
-              { key: '200+', label: '¥200+' },
+              { key: '0-200', label: '¥0～200' },
+              { key: '200-300', label: '¥200～300' },
+              { key: '300+', label: '¥300+' },
             ].map(item => (
               <button
                 key={item.key}
@@ -231,12 +238,12 @@ function App() {
             ))}
           </div>
           <div className="flex flex-wrap gap-1.5 sm:gap-2 items-center">
-            <span className="text-xs sm:text-sm font-medium text-white/50">⏱️ 时长：</span>
+            <span className="text-xs sm:text-sm font-medium text-white/50">⏱️ 团建时长：</span>
             {[
               { key: 'all', label: '全部' },
-              { key: '半天', label: '半天' },
-              { key: '一天', label: '一天' },
-              { key: '两天+', label: '两天+' },
+              { key: '0.5天', label: '0.5天' },
+              { key: '全天', label: '全天' },
+              { key: '2天', label: '2天' },
             ].map(item => (
               <button
                 key={item.key}
