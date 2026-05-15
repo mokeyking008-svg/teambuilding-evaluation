@@ -41,13 +41,16 @@ export default function VoteToast() {
 
   return (
     <div
-      className={`fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-[100] transition-all ${
-        toast.show
-          ? 'opacity-100 translate-y-0'
-          : 'opacity-0 -translate-y-4 pointer-events-none'
-      }`}
+      className="fixed inset-0 z-[100] flex items-center justify-center transition-all"
       style={{ transitionDuration: '400ms' }}
     >
+      {/* 半透明背景 */}
+      {toast.show && <div className="absolute inset-0 bg-black/30" />}
+      {/* Toast 内容 */}
+      <div
+        className={`relative transition-all ${toast.show ? 'opacity-100 scale-100' : 'opacity-0 scale-95 pointer-events-none'}`}
+        style={{ transitionDuration: '400ms' }}
+      >
       <div className="glass-solid rounded-2xl px-5 py-4 shadow-2xl min-w-[280px] max-w-[360px] border border-success/20">
         {/* 主标题 */}
         <div className="flex items-center gap-2 mb-2">
@@ -72,6 +75,7 @@ export default function VoteToast() {
             <span className="text-xs font-bold text-primary">已投票 {toast.totalVoteCount} 人</span>
           </div>
         </div>
+      </div>
       </div>
     </div>
   );
