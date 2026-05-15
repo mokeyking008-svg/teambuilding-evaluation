@@ -95,7 +95,6 @@ export default function AdminPanel({ plans, onSavePlans, onExit }) {
               验证
             </button>
           </div>
-          <p className="text-xs text-white/25 text-center mt-4">提示：默认密码 admin2025</p>
         </div>
       </div>
     );
