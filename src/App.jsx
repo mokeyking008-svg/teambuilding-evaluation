@@ -439,13 +439,98 @@ function PlanDetailModal({ plan, user, onClose, onVote, getUserVote, voteAnimId,
           </div>
 
           <div className="p-4 sm:p-6 space-y-5">
-            {/* 方案详情 */}
+            {/* 方案简介 */}
             <div>
               <h3 className="text-base font-bold text-white/90 mb-2 flex items-center gap-2">
-                <FileText className="w-4 h-4 text-accent" /> 方案介绍
+                <FileText className="w-4 h-4 text-accent" /> 方案简介
               </h3>
-              <p className="text-white/60 text-sm leading-relaxed">{plan.details || plan.summary}</p>
+              <p className="text-white/60 text-sm leading-relaxed">{plan.summary}</p>
             </div>
+
+            {/* 结构化详情：行程安排 / 预算明细 / 方案亮点 */}
+            {plan.itinerary && (
+              <div>
+                <h3 className="text-sm font-bold text-white/90 mb-3 flex items-center gap-2">
+                  <Clock className="w-4 h-4 text-accent" /> 行程安排
+                </h3>
+                <div className="space-y-1.5">
+                  {plan.itinerary.map((item, idx) => (
+                    <div key={idx} className="flex gap-3 items-start">
+                      <span className="text-xs font-mono text-accent bg-accent/10 px-2 py-0.5 rounded flex-shrink-0 mt-0.5 whitespace-nowrap">{item.time}</span>
+                      <div className="flex-1 min-w-0">
+                        <span className="text-sm font-medium text-white/80">{item.title}</span>
+                        <p className="text-xs text-white/40 mt-0.5 leading-relaxed">{item.desc}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {plan.budgetBreakdown && plan.budgetBreakdown.length > 0 && (
+              <div>
+                <h3 className="text-sm font-bold text-white/90 mb-3 flex items-center gap-2">
+                  <Coins className="w-4 h-4 text-accent" /> 预算明细
+                </h3>
+                <div className="glass rounded-lg overflow-hidden">
+                  <table className="w-full text-xs">
+                    <thead>
+                      <tr className="border-b border-white/5">
+                        <th className="text-left text-white/40 font-medium px-3 py-2">项目</th>
+                        <th className="text-right text-white/40 font-medium px-3 py-2 w-16">总价</th>
+                        <th className="text-right text-white/40 font-medium px-3 py-2 w-16">人均</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {plan.budgetBreakdown.map((row, idx) => (
+                        <tr key={idx} className="border-b border-white/[0.03] last:border-0">
+                          <td className="text-white/60 px-3 py-1.5">{row.item}</td>
+                          <td className="text-right text-white/30 px-3 py-1.5">{row.cost}</td>
+                          <td className="text-right text-white/70 font-medium px-3 py-1.5">{row.perPerson}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                    <tfoot>
+                      <tr className="border-t border-white/10">
+                        <td className="text-white/90 font-bold px-3 py-2">合计</td>
+                        <td className="text-right text-white/50 px-3 py-2">
+                          {plan.budgetBreakdown.reduce((s, r) => s + r.cost, 0)}
+                        </td>
+                        <td className="text-right text-accent font-bold px-3 py-2">
+                          {plan.budgetBreakdown.reduce((s, r) => s + r.perPerson, 0)}
+                        </td>
+                      </tr>
+                    </tfoot>
+                  </table>
+                </div>
+              </div>
+            )}
+
+            {plan.highlights && plan.highlights.length > 0 && (
+              <div>
+                <h3 className="text-sm font-bold text-white/90 mb-3 flex items-center gap-2">
+                  <Sparkles className="w-4 h-4 text-accent" /> 方案亮点
+                </h3>
+                <div className="space-y-2">
+                  {plan.highlights.map((h, idx) => (
+                    <div key={idx} className="flex gap-2 items-start">
+                      <span className="w-4 h-4 rounded-full bg-accent/20 text-accent text-[10px] font-bold flex items-center justify-center flex-shrink-0 mt-0.5">{idx + 1}</span>
+                      <p className="text-sm text-white/55 leading-relaxed">{h}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* 兼容旧版 details 纯文本 */}
+            {!plan.itinerary && plan.details && (
+              <div>
+                <h3 className="text-base font-bold text-white/90 mb-2 flex items-center gap-2">
+                  <FileText className="w-4 h-4 text-accent" /> 方案介绍
+                </h3>
+                <p className="text-white/60 text-sm leading-relaxed">{plan.details}</p>
+              </div>
+            )}
 
             {/* 标签 */}
             {plan.tags && plan.tags.length > 0 && (
