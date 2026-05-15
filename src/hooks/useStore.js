@@ -6,7 +6,14 @@ const KEYS = {
   RATINGS: 'tb_ratings',
   REVIEWS: 'tb_reviews',
   VOTES: 'tb_votes',
+  PLANS: 'tb_plans',
+  USERS: 'tb_users',
+  QUICK_RATINGS: 'tb_quick_ratings',
 };
+
+// 数据版本号 — 递增此版本号将清除所有用户的本地数据（投票/评分/点评/登录）
+const DATA_VERSION = 1;
+const DATA_VERSION_KEY = 'tb_data_version';
 
 // 头像 URL 生成（统一 lorelei 风格）
 export function getAvatarUrl(seed) {
@@ -15,6 +22,14 @@ export function getAvatarUrl(seed) {
 
 // 初始化 localStorage 数据
 function initStorage() {
+  // 版本检查：版本不匹配则清除所有用户数据
+  const savedVersion = localStorage.getItem(DATA_VERSION_KEY);
+  if (savedVersion !== String(DATA_VERSION)) {
+    Object.values(KEYS).forEach(key => localStorage.removeItem(key));
+    localStorage.removeItem(DATA_VERSION_KEY);
+  }
+  localStorage.setItem(DATA_VERSION_KEY, String(DATA_VERSION));
+
   if (!localStorage.getItem(KEYS.RATINGS)) {
     localStorage.setItem(KEYS.RATINGS, JSON.stringify({}));
   }
