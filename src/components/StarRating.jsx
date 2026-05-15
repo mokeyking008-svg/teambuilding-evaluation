@@ -20,7 +20,7 @@ export default function StarRating({ value, onChange, size = 'md', readOnly = fa
           onClick={() => onChange && onChange(star)}
           onMouseEnter={() => !readOnly && setHovered(star)}
           onMouseLeave={() => !readOnly && setHovered(null)}
-          className={`transition-transform ${readOnly ? 'cursor-default' : 'cursor-pointer hover:scale-110'}`}
+          className={`transition-all duration-200 ${readOnly ? 'cursor-default' : 'cursor-pointer hover:scale-125 hover:drop-shadow-[0_0_6px_rgba(255,217,61,0.5)]'}`}
         >
           <svg
             className={`${sizeClasses[size]} transition-colors ${star <= displayValue ? 'text-star' : 'text-star-empty'}`}
@@ -32,7 +32,7 @@ export default function StarRating({ value, onChange, size = 'md', readOnly = fa
         </button>
       ))}
       {value > 0 && (
-        <span className="ml-1.5 text-sm text-gray-500 self-center font-medium">{value.toFixed(1)}</span>
+        <span className="ml-1.5 text-sm text-white/50 self-center font-medium">{value.toFixed(1)}</span>
       )}
     </div>
   );

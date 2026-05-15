@@ -24,6 +24,17 @@ function loadPlans() {
   return defaultPlans;
 }
 
+// 装饰性浮动光球
+function FloatingOrbs() {
+  return (
+    <>
+      <div className="bg-orb" style={{ width: 400, height: 400, top: '-10%', left: '-5%', background: '#667EEA' }} />
+      <div className="bg-orb" style={{ width: 350, height: 350, top: '30%', right: '-8%', background: '#764BA2' }} />
+      <div className="bg-orb" style={{ width: 300, height: 300, bottom: '5%', left: '20%', background: '#A78BFA' }} />
+    </>
+  );
+}
+
 function App() {
   const { user, login, logout } = useUser();
   const [showLogin, setShowLogin] = useState(false);
@@ -132,13 +143,15 @@ function App() {
   const totalVotes = getTotalVotes();
 
   return (
-    <div className="min-h-screen bg-warm-bg">
-      {/* 顶部导航 */}
-      <header className="sticky top-0 z-40 bg-white/80 backdrop-blur-lg border-b border-gray-100 shadow-sm">
+    <div className="min-h-screen relative">
+      <FloatingOrbs />
+
+      {/* 顶部导航 - Glass */}
+      <header className="sticky top-0 z-40 nav-glass">
         <div className="max-w-5xl mx-auto px-4 h-14 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <span className="text-2xl">🏕️</span>
-            <h1 className="text-lg font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent hidden sm:block">
+            <h1 className="text-lg font-bold gradient-text hidden sm:block">
               团建方案评估
             </h1>
           </div>
@@ -146,7 +159,7 @@ function App() {
             {/* 管理按钮 */}
             <button
               onClick={() => setShowAdmin(true)}
-              className="flex items-center gap-1.5 px-3 py-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-100 text-sm rounded-lg transition"
+              className="flex items-center gap-1.5 px-3 py-1.5 text-white/50 hover:text-white/80 hover:bg-white/5 text-sm rounded-lg transition"
               title="管理方案"
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -158,14 +171,14 @@ function App() {
 
             {user ? (
               <div className="flex items-center gap-2">
-                <span className="text-sm text-gray-600 hidden sm:inline">{user.name}</span>
-                <img src={user.avatar} alt={user.name} className="w-8 h-8 rounded-full border-2 border-orange-200" />
-                <button onClick={logout} className="text-xs text-gray-400 hover:text-gray-600 transition ml-1">退出</button>
+                <span className="text-sm text-white/70 hidden sm:inline">{user.name}</span>
+                <img src={user.avatar} alt={user.name} className="w-8 h-8 rounded-full border-2 border-primary/40" />
+                <button onClick={logout} className="text-xs text-white/40 hover:text-white/70 transition ml-1">退出</button>
               </div>
             ) : (
               <button
                 onClick={() => setShowLogin(true)}
-                className="flex items-center gap-1.5 px-4 py-1.5 bg-[#0089FF] text-white text-sm font-medium rounded-full hover:bg-[#0077DD] transition shadow-sm"
+                className="btn-glass flex items-center gap-1.5 px-4 py-1.5 text-white text-sm font-medium rounded-full"
               >
                 <svg viewBox="0 0 24 24" className="w-4 h-4" fill="currentColor">
                   <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/>
@@ -178,16 +191,16 @@ function App() {
         </div>
       </header>
 
-      <main className="max-w-5xl mx-auto px-4 py-6">
-        {/* 投票进度 */}
+      <main className="max-w-5xl mx-auto px-4 py-6 relative z-10">
+        {/* 投票进度 - Glass */}
         {totalVotes > 0 && (
-          <div className="mb-6 bg-gradient-to-r from-primary/10 to-secondary/10 rounded-2xl p-4 flex items-center gap-3">
+          <div className="mb-6 glass-solid rounded-2xl p-4 flex items-center gap-3">
             <span className="text-2xl">🗳️</span>
             <div className="flex-1">
-              <p className="text-sm font-medium text-gray-700">
-                共 <span className="text-primary font-bold text-lg">{totalVotes}</span> 人参与投票
+              <p className="text-sm font-medium text-white/90">
+                共 <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-accent font-bold text-lg">{totalVotes}</span> 人参与投票
               </p>
-              <p className="text-xs text-gray-500">你的每一票都很重要！</p>
+              <p className="text-xs text-white/40">你的每一票都很重要！</p>
             </div>
           </div>
         )}
@@ -195,7 +208,7 @@ function App() {
         {/* 筛选栏 */}
         <div className="mb-6 space-y-3">
           <div className="flex flex-wrap gap-2 items-center">
-            <span className="text-sm font-medium text-gray-500">💰 预算：</span>
+            <span className="text-sm font-medium text-white/50">💰 预算：</span>
             {[
               { key: 'all', label: '全部' },
               { key: '0-100', label: '¥0-100' },
@@ -207,8 +220,8 @@ function App() {
                 onClick={() => setFilterBudget(item.key)}
                 className={`filter-btn px-3 py-1.5 rounded-full text-sm font-medium ${
                   filterBudget === item.key
-                    ? 'bg-primary text-white shadow-md'
-                    : 'bg-white text-gray-600 hover:bg-orange-50 border border-gray-200'
+                    ? 'btn-glass text-white shadow-lg'
+                    : 'glass text-white/60 hover:text-white/90'
                 }`}
               >
                 {item.label}
@@ -216,7 +229,7 @@ function App() {
             ))}
           </div>
           <div className="flex flex-wrap gap-2 items-center">
-            <span className="text-sm font-medium text-gray-500">⏱️ 时长：</span>
+            <span className="text-sm font-medium text-white/50">⏱️ 时长：</span>
             {[
               { key: 'all', label: '全部' },
               { key: '半天', label: '半天' },
@@ -228,8 +241,8 @@ function App() {
                 onClick={() => setFilterDuration(item.key)}
                 className={`filter-btn px-3 py-1.5 rounded-full text-sm font-medium ${
                   filterDuration === item.key
-                    ? 'bg-secondary text-white shadow-md'
-                    : 'bg-white text-gray-600 hover:bg-teal-50 border border-gray-200'
+                    ? 'btn-glass text-white shadow-lg'
+                    : 'glass text-white/60 hover:text-white/90'
                 }`}
               >
                 {item.label}
@@ -238,7 +251,7 @@ function App() {
           </div>
         </div>
 
-        {/* 方案卡片 */}
+        {/* 方案卡片 - Glass */}
         {filteredPlans.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
             {filteredPlans.map(plan => {
@@ -251,19 +264,19 @@ function App() {
               return (
                 <div
                   key={plan.id}
-                  className="plan-card bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden cursor-pointer"
+                  className="plan-card glass rounded-2xl overflow-hidden cursor-pointer"
                   onClick={() => toggleDetail(plan.id)}
                 >
                   <div className="relative h-40 overflow-hidden">
                     <img src={plan.cover} alt={plan.name} className="w-full h-full object-cover" loading="lazy" />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
                     <div className="absolute bottom-3 left-3 right-3">
                       <h3 className="text-white font-bold text-base leading-tight">{plan.name}</h3>
                     </div>
                     {avgScore > 0 && (
-                      <div className="absolute top-3 right-3 bg-white/90 backdrop-blur-sm rounded-full px-2.5 py-1 flex items-center gap-1">
+                      <div className="absolute top-3 right-3 glass-solid rounded-full px-2.5 py-1 flex items-center gap-1">
                         <span className="text-sm">⭐</span>
-                        <span className="font-bold text-sm text-gray-800">{avgScore.toFixed(1)}</span>
+                        <span className="font-bold text-sm text-white">{avgScore.toFixed(1)}</span>
                       </div>
                     )}
                     {isVotedByMe && (
@@ -272,21 +285,21 @@ function App() {
                   </div>
                   <div className="p-4">
                     <div className="flex flex-wrap gap-1.5 mb-3">
-                      <span className="inline-flex items-center gap-1 text-xs text-gray-500 bg-gray-50 px-2 py-1 rounded-full">📍 {plan.location}</span>
-                      <span className="inline-flex items-center gap-1 text-xs text-gray-500 bg-gray-50 px-2 py-1 rounded-full">⏱️ {plan.duration}</span>
-                      <span className="inline-flex items-center gap-1 text-xs text-gray-500 bg-gray-50 px-2 py-1 rounded-full">👥 {plan.maxPeople}人</span>
+                      <span className="tag-glass inline-flex items-center gap-1 text-xs text-white/70 px-2 py-1 rounded-full">📍 {plan.location}</span>
+                      <span className="tag-glass inline-flex items-center gap-1 text-xs text-white/70 px-2 py-1 rounded-full">⏱️ {plan.duration}</span>
+                      <span className="tag-glass inline-flex items-center gap-1 text-xs text-white/70 px-2 py-1 rounded-full">👥 {plan.maxPeople}人</span>
                     </div>
-                    <p className="text-sm text-gray-600 leading-relaxed line-clamp-3">{plan.summary}</p>
-                    <div className="flex items-center justify-between mt-4 pt-3 border-t border-gray-50">
-                      <span className="text-primary font-bold text-lg">¥{plan.budgetNum}<span className="text-xs text-gray-400 font-normal">/人</span></span>
-                      <span className="text-xs text-gray-400">🗳️ {voteCount} 票</span>
+                    <p className="text-sm text-white/60 leading-relaxed line-clamp-3">{plan.summary}</p>
+                    <div className="flex items-center justify-between mt-4 pt-3 border-t border-white/10">
+                      <span className="gradient-text font-bold text-lg">¥{plan.budgetNum}<span className="text-xs text-white/30 font-normal">/人</span></span>
+                      <span className="text-xs text-white/40">🗳️ {voteCount} 票</span>
                     </div>
                     <button
                       onClick={(e) => { e.stopPropagation(); handleVote(plan.id); }}
                       className={`mt-3 w-full py-2.5 rounded-xl text-sm font-bold transition ${
                         isVotedByMe
-                          ? 'bg-success/10 text-success border-2 border-success/30'
-                          : 'bg-gradient-to-r from-primary to-primary-light text-white hover:from-primary-dark hover:to-primary shadow-md hover:shadow-lg active:scale-[0.98]'
+                          ? 'glass text-success border-2 border-success/30'
+                          : 'btn-glass text-white shadow-lg'
                       } ${voteAnimId === plan.id ? 'vote-pulse' : ''}`}
                     >
                       {isVotedByMe ? '✓ 已投票（点击改投）' : '🗳️ 投给这个方案'}
@@ -294,7 +307,7 @@ function App() {
                     {plan.tags && plan.tags.length > 0 && (
                       <div className="flex flex-wrap gap-1 mt-3">
                         {plan.tags.map(tag => (
-                          <span key={tag} className="text-xs text-gray-400 bg-gray-50 px-2 py-0.5 rounded-full">#{tag}</span>
+                          <span key={tag} className="tag-glass text-xs text-white/40 px-2 py-0.5 rounded-full">#{tag}</span>
                         ))}
                       </div>
                     )}
@@ -306,8 +319,8 @@ function App() {
         ) : (
           <div className="text-center py-16">
             <span className="text-6xl">🔍</span>
-            <p className="text-gray-400 mt-4 text-lg">没有找到匹配的方案</p>
-            <button onClick={() => { setFilterBudget('all'); setFilterDuration('all'); }} className="mt-3 text-primary hover:text-primary-dark text-sm font-medium">
+            <p className="text-white/40 mt-4 text-lg">没有找到匹配的方案</p>
+            <button onClick={() => { setFilterBudget('all'); setFilterDuration('all'); }} className="mt-3 text-primary hover:text-primary-light text-sm font-medium transition">
               清除筛选
             </button>
           </div>
@@ -333,16 +346,16 @@ function App() {
         <div className="mb-8">
           <button
             onClick={() => setShowResults(!showResults)}
-            className="w-full bg-white rounded-2xl border border-gray-100 shadow-sm p-5 flex items-center justify-between hover:shadow-md transition group"
+            className="w-full glass glass-hover rounded-2xl p-5 flex items-center justify-between group"
           >
             <div className="flex items-center gap-3">
               <span className="text-2xl">🏆</span>
               <div className="text-left">
-                <h2 className="text-lg font-bold text-gray-800 group-hover:text-primary transition">查看投票结果</h2>
-                <p className="text-sm text-gray-400">票数统计与评分排名</p>
+                <h2 className="text-lg font-bold text-white/90 group-hover:text-white transition">查看投票结果</h2>
+                <p className="text-sm text-white/40">票数统计与评分排名</p>
               </div>
             </div>
-            <svg className={`w-5 h-5 text-gray-400 transition-transform ${showResults ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className={`w-5 h-5 text-white/40 transition-transform ${showResults ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7"/>
             </svg>
           </button>
@@ -354,9 +367,8 @@ function App() {
         </div>
       </main>
 
-      <footer className="text-center py-6 text-xs text-gray-400">
+      <footer className="text-center py-6 text-xs text-white/25 relative z-10">
         <p>团建方案评估工具 · 数据存储在本地浏览器</p>
-        <p className="mt-1">正式版将接入后端服务</p>
       </footer>
 
       {/* Modals */}
@@ -402,15 +414,15 @@ function PlanDetailModal({ plan, user, onClose, onVote, getUserVote, voteAnimId,
   };
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto bg-black/40 modal-overlay" onClick={onClose}>
+    <div className="fixed inset-0 z-50 overflow-y-auto bg-black/60 modal-overlay" onClick={onClose}>
       <div className="min-h-full flex items-start justify-center py-8 px-4" onClick={e => e.stopPropagation()}>
-        <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl relative" ref={detailRef}>
+        <div className="glass-solid rounded-2xl shadow-2xl w-full max-w-2xl relative" ref={detailRef}>
           <div className="relative h-56 sm:h-64 overflow-hidden rounded-t-2xl">
             <img src={plan.cover} alt={plan.name} className="w-full h-full object-cover" />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
             <button
               onClick={onClose}
-              className="absolute top-4 right-4 w-10 h-10 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center text-white hover:bg-white/40 transition"
+              className="absolute top-4 right-4 w-10 h-10 glass-solid rounded-full flex items-center justify-center text-white/80 hover:text-white hover:bg-white/20 transition"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12"/>
@@ -419,47 +431,47 @@ function PlanDetailModal({ plan, user, onClose, onVote, getUserVote, voteAnimId,
             <div className="absolute bottom-6 left-6 right-6">
               <h2 className="text-white font-bold text-2xl mb-2">{plan.name}</h2>
               <div className="flex flex-wrap gap-2">
-                <span className="bg-white/20 backdrop-blur-sm text-white text-xs px-3 py-1 rounded-full">📍 {plan.location}</span>
-                <span className="bg-white/20 backdrop-blur-sm text-white text-xs px-3 py-1 rounded-full">⏱️ {plan.duration}</span>
-                <span className="bg-white/20 backdrop-blur-sm text-white text-xs px-3 py-1 rounded-full">👥 最多{plan.maxPeople}人</span>
-                <span className="bg-white/20 backdrop-blur-sm text-white text-xs px-3 py-1 rounded-full">💰 ¥{plan.budgetNum}/人</span>
+                <span className="glass-solid text-white/90 text-xs px-3 py-1 rounded-full">📍 {plan.location}</span>
+                <span className="glass-solid text-white/90 text-xs px-3 py-1 rounded-full">⏱️ {plan.duration}</span>
+                <span className="glass-solid text-white/90 text-xs px-3 py-1 rounded-full">👥 最多{plan.maxPeople}人</span>
+                <span className="glass-solid text-white/90 text-xs px-3 py-1 rounded-full">💰 ¥{plan.budgetNum}/人</span>
               </div>
             </div>
           </div>
 
           <div className="p-6 space-y-6">
             <div>
-              <h3 className="text-base font-bold text-gray-800 mb-2">📋 方案详情</h3>
-              <p className="text-gray-600 text-sm leading-relaxed">{plan.details || plan.summary}</p>
+              <h3 className="text-base font-bold text-white/90 mb-2">📋 方案详情</h3>
+              <p className="text-white/60 text-sm leading-relaxed">{plan.details || plan.summary}</p>
             </div>
 
             {plan.tags && plan.tags.length > 0 && (
               <div className="flex flex-wrap gap-2">
                 {plan.tags.map(tag => (
-                  <span key={tag} className="bg-orange-50 text-primary text-xs font-medium px-3 py-1 rounded-full">#{tag}</span>
+                  <span key={tag} className="tag-glass text-primary text-xs font-medium px-3 py-1 rounded-full">#{tag}</span>
                 ))}
               </div>
             )}
 
             {avgScore > 0 && (
-              <div className="bg-gray-50 rounded-xl p-4">
-                <h3 className="text-sm font-bold text-gray-700 mb-3">📊 综合评分</h3>
+              <div className="glass rounded-xl p-4">
+                <h3 className="text-sm font-bold text-white/80 mb-3">📊 综合评分</h3>
                 <div className="flex items-center gap-3 mb-3">
                   <span className="text-3xl">⭐</span>
-                  <span className="text-2xl font-bold text-gray-800">{avgScore.toFixed(1)}</span>
-                  <span className="text-sm text-gray-400">({ratingCount} 人评分)</span>
+                  <span className="text-2xl font-bold text-white">{avgScore.toFixed(1)}</span>
+                  <span className="text-sm text-white/40">({ratingCount} 人评分)</span>
                 </div>
                 <div className="space-y-2">
                   {ratingDimensions.map(dim => {
                     const avg = ratingsHook.getDimensionAverage(dim.key);
                     return (
                       <div key={dim.key} className="flex items-center justify-between">
-                        <span className="text-sm text-gray-600">{dim.icon} {dim.label}</span>
+                        <span className="text-sm text-white/60">{dim.icon} {dim.label}</span>
                         <div className="flex items-center gap-2">
-                          <div className="w-24 bg-gray-200 rounded-full h-1.5">
-                            <div className="bg-star rounded-full h-1.5 transition-all duration-500" style={{ width: `${avg / 5 * 100}%` }} />
+                          <div className="w-24 bg-white/10 rounded-full h-1.5">
+                            <div className="bg-gradient-to-r from-primary to-accent rounded-full h-1.5 transition-all duration-500" style={{ width: `${avg / 5 * 100}%` }} />
                           </div>
-                          <span className="text-sm font-medium text-gray-700 w-8 text-right">{avg.toFixed(1)}</span>
+                          <span className="text-sm font-medium text-white/80 w-8 text-right">{avg.toFixed(1)}</span>
                         </div>
                       </div>
                     );
@@ -482,8 +494,8 @@ function PlanDetailModal({ plan, user, onClose, onVote, getUserVote, voteAnimId,
               onClick={() => { onVote(plan.id); onRefresh(); }}
               className={`w-full py-4 rounded-xl text-base font-bold transition ${
                 isVotedByMe
-                  ? 'bg-success/10 text-success border-2 border-success/30'
-                  : 'bg-gradient-to-r from-primary to-primary-light text-white hover:from-primary-dark hover:to-primary shadow-lg hover:shadow-xl active:scale-[0.98]'
+                  ? 'glass text-success border-2 border-success/30'
+                  : 'btn-glass text-white shadow-xl hover:shadow-2xl active:scale-[0.98]'
               } ${voteAnimId === plan.id ? 'vote-pulse' : ''}`}
             >
               {isVotedByMe ? '✓ 已投票（点击改投其他方案）' : '🗳️ 投票支持这个方案！'}

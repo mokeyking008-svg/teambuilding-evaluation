@@ -7,7 +7,7 @@ export default function AdminPanel({ plans, onSavePlans, onExit }) {
   const [authenticated, setAuthenticated] = useState(false);
   const [password, setPassword] = useState('');
   const [pwdError, setPwdError] = useState('');
-  const [editingPlan, setEditingPlan] = useState(null); // null = list, 'new' = add, plan obj = edit
+  const [editingPlan, setEditingPlan] = useState(null);
   const [deleteConfirm, setDeleteConfirm] = useState(null);
   const [toast, setToast] = useState('');
 
@@ -41,13 +41,11 @@ export default function AdminPanel({ plans, onSavePlans, onExit }) {
 
   const handleDelete = (planId) => {
     const updated = plans.filter(p => p.id !== planId);
-    // 同时清理该方案的评分/点评/投票
     const ratings = JSON.parse(localStorage.getItem('tb_ratings') || '{}');
     const reviews = JSON.parse(localStorage.getItem('tb_reviews') || '{}');
     const votes = JSON.parse(localStorage.getItem('tb_votes') || '{}');
     delete ratings[planId];
     delete reviews[planId];
-    // 移除投票中投给该方案的记录
     const filteredVotes = {};
     Object.entries(votes).forEach(([uid, pid]) => {
       if (pid !== planId) filteredVotes[uid] = pid;
@@ -64,14 +62,14 @@ export default function AdminPanel({ plans, onSavePlans, onExit }) {
   // 密码验证界面
   if (!authenticated) {
     return (
-      <div className="fixed inset-0 z-50 flex items-center justify-center modal-overlay bg-black/40">
-        <div className="bg-white rounded-2xl shadow-2xl w-[90vw] max-w-sm p-6 mx-4" onClick={e => e.stopPropagation()}>
+      <div className="fixed inset-0 z-50 flex items-center justify-center modal-overlay bg-black/60">
+        <div className="glass-solid rounded-2xl shadow-2xl w-[90vw] max-w-sm p-6 mx-4" onClick={e => e.stopPropagation()}>
           <div className="text-center mb-5">
-            <div className="inline-flex items-center justify-center w-14 h-14 bg-orange-100 rounded-full mb-3">
+            <div className="inline-flex items-center justify-center w-14 h-14 glass rounded-full mb-3">
               <span className="text-2xl">🔐</span>
             </div>
-            <h2 className="text-xl font-bold text-gray-800">管理员验证</h2>
-            <p className="text-sm text-gray-500 mt-1">请输入管理员密码</p>
+            <h2 className="text-xl font-bold text-white">管理员验证</h2>
+            <p className="text-sm text-white/50 mt-1">请输入管理员密码</p>
           </div>
           <input
             type="password"
@@ -79,25 +77,25 @@ export default function AdminPanel({ plans, onSavePlans, onExit }) {
             onChange={e => { setPassword(e.target.value); setPwdError(''); }}
             onKeyDown={e => e.key === 'Enter' && handleLogin()}
             placeholder="输入密码..."
-            className={`w-full px-4 py-3 bg-gray-50 border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-orange-300 focus:border-orange-400 transition text-center tracking-widest ${pwdError ? 'border-red-300 bg-red-50' : 'border-gray-200'}`}
+            className={`input-glass w-full px-4 py-3 rounded-xl text-sm text-center tracking-widest ${pwdError ? 'border-red-500/50' : ''}`}
             autoFocus
           />
-          {pwdError && <p className="text-xs text-red-500 mt-2 text-center">{pwdError}</p>}
+          {pwdError && <p className="text-xs text-red-400 mt-2 text-center">{pwdError}</p>}
           <div className="flex gap-3 mt-4">
             <button
               onClick={onExit}
-              className="flex-1 py-3 bg-gray-100 text-gray-600 font-medium rounded-xl hover:bg-gray-200 transition"
+              className="flex-1 py-3 glass text-white/70 font-medium rounded-xl hover:bg-white/10 transition"
             >
               返回
             </button>
             <button
               onClick={handleLogin}
-              className="flex-1 py-3 bg-gradient-to-r from-primary to-primary-light text-white font-bold rounded-xl hover:from-primary-dark hover:to-primary transition shadow-md"
+              className="flex-1 py-3 btn-glass text-white font-bold rounded-xl shadow-lg"
             >
               验证
             </button>
           </div>
-          <p className="text-xs text-gray-400 text-center mt-4">提示：默认密码 admin2025</p>
+          <p className="text-xs text-white/25 text-center mt-4">提示：默认密码 admin2025</p>
         </div>
       </div>
     );
@@ -106,16 +104,16 @@ export default function AdminPanel({ plans, onSavePlans, onExit }) {
   // 表单模式
   if (editingPlan === 'new' || (editingPlan && typeof editingPlan === 'object')) {
     return (
-      <div className="fixed inset-0 z-50 overflow-y-auto bg-black/40 modal-overlay">
+      <div className="fixed inset-0 z-50 overflow-y-auto bg-black/60 modal-overlay">
         <div className="min-h-full flex items-start justify-center py-8 px-4" onClick={onExit}>
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg relative" onClick={e => e.stopPropagation()}>
-            <div className="p-6 border-b border-gray-100 flex items-center justify-between">
-              <h2 className="text-lg font-bold text-gray-800">
+          <div className="glass-solid rounded-2xl shadow-2xl w-full max-w-lg relative" onClick={e => e.stopPropagation()}>
+            <div className="p-6 border-b border-white/10 flex items-center justify-between">
+              <h2 className="text-lg font-bold text-white">
                 {editingPlan === 'new' ? '➕ 新增方案' : '✏️ 编辑方案'}
               </h2>
               <button
                 onClick={() => setEditingPlan(null)}
-                className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 transition text-gray-400"
+                className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-white/10 transition text-white/40"
               >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12"/>
@@ -137,9 +135,9 @@ export default function AdminPanel({ plans, onSavePlans, onExit }) {
 
   // 管理列表
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto bg-black/40 modal-overlay" onClick={onExit}>
+    <div className="fixed inset-0 z-50 overflow-y-auto bg-black/60 modal-overlay" onClick={onExit}>
       <div className="min-h-full flex items-start justify-center py-8 px-4" onClick={e => e.stopPropagation()}>
-        <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl relative">
+        <div className="glass-solid rounded-2xl shadow-2xl w-full max-w-2xl relative">
           {/* Toast */}
           {toast && (
             <div className="fixed top-6 left-1/2 -translate-x-1/2 z-[60] bg-success text-white px-6 py-3 rounded-full shadow-lg font-medium text-sm">
@@ -148,15 +146,15 @@ export default function AdminPanel({ plans, onSavePlans, onExit }) {
           )}
 
           {/* Header */}
-          <div className="p-6 border-b border-gray-100 flex items-center justify-between">
+          <div className="p-6 border-b border-white/10 flex items-center justify-between">
             <div>
-              <h2 className="text-lg font-bold text-gray-800">⚙️ 方案管理</h2>
-              <p className="text-sm text-gray-500 mt-0.5">共 {plans.length} 个方案</p>
+              <h2 className="text-lg font-bold text-white">⚙️ 方案管理</h2>
+              <p className="text-sm text-white/50 mt-0.5">共 {plans.length} 个方案</p>
             </div>
             <div className="flex items-center gap-2">
               <button
                 onClick={() => setEditingPlan('new')}
-                className="flex items-center gap-1.5 px-4 py-2 bg-gradient-to-r from-primary to-primary-light text-white text-sm font-bold rounded-xl hover:from-primary-dark hover:to-primary transition shadow-sm"
+                className="flex items-center gap-1.5 px-4 py-2 btn-glass text-white text-sm font-bold rounded-xl shadow-lg"
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4"/>
@@ -165,7 +163,7 @@ export default function AdminPanel({ plans, onSavePlans, onExit }) {
               </button>
               <button
                 onClick={onExit}
-                className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 transition text-gray-400"
+                className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-white/10 transition text-white/40"
               >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12"/>
@@ -179,12 +177,12 @@ export default function AdminPanel({ plans, onSavePlans, onExit }) {
             {plans.map(plan => (
               <div
                 key={plan.id}
-                className="flex items-center gap-3 p-3 rounded-xl hover:bg-gray-50 transition group"
+                className="flex items-center gap-3 p-3 rounded-xl hover:bg-white/5 transition group"
               >
                 <img src={plan.cover} alt={plan.name} className="w-16 h-12 rounded-lg object-cover flex-shrink-0" />
                 <div className="flex-1 min-w-0">
-                  <p className="font-medium text-gray-800 text-sm truncate">{plan.name}</p>
-                  <div className="flex items-center gap-2 text-xs text-gray-400 mt-0.5">
+                  <p className="font-medium text-white/80 text-sm truncate">{plan.name}</p>
+                  <div className="flex items-center gap-2 text-xs text-white/35 mt-0.5">
                     <span>📍 {plan.location}</span>
                     <span>💰 ¥{plan.budgetNum}/人</span>
                   </div>
@@ -192,7 +190,7 @@ export default function AdminPanel({ plans, onSavePlans, onExit }) {
                 <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition">
                   <button
                     onClick={() => setEditingPlan(plan)}
-                    className="p-2 text-gray-400 hover:text-blue-500 hover:bg-blue-50 rounded-lg transition"
+                    className="p-2 text-white/40 hover:text-primary hover:bg-primary/10 rounded-lg transition"
                     title="编辑"
                   >
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -201,7 +199,7 @@ export default function AdminPanel({ plans, onSavePlans, onExit }) {
                   </button>
                   <button
                     onClick={() => setDeleteConfirm(plan.id)}
-                    className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition"
+                    className="p-2 text-white/40 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition"
                     title="删除"
                   >
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -214,7 +212,7 @@ export default function AdminPanel({ plans, onSavePlans, onExit }) {
             {plans.length === 0 && (
               <div className="text-center py-12">
                 <span className="text-4xl">📭</span>
-                <p className="text-gray-400 mt-2">暂无方案，点击上方按钮新增</p>
+                <p className="text-white/30 mt-2">暂无方案，点击上方按钮新增</p>
               </div>
             )}
           </div>
@@ -223,19 +221,19 @@ export default function AdminPanel({ plans, onSavePlans, onExit }) {
 
       {/* 删除确认框 */}
       {deleteConfirm && (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/50" onClick={() => setDeleteConfirm(null)}>
-          <div className="bg-white rounded-2xl shadow-2xl w-[90vw] max-w-sm p-6 mx-4" onClick={e => e.stopPropagation()}>
+        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/70" onClick={() => setDeleteConfirm(null)}>
+          <div className="glass-solid rounded-2xl shadow-2xl w-[90vw] max-w-sm p-6 mx-4" onClick={e => e.stopPropagation()}>
             <div className="text-center mb-4">
-              <div className="inline-flex items-center justify-center w-14 h-14 bg-red-100 rounded-full mb-3">
+              <div className="inline-flex items-center justify-center w-14 h-14 bg-red-500/10 rounded-full mb-3">
                 <span className="text-2xl">⚠️</span>
               </div>
-              <h3 className="text-lg font-bold text-gray-800">确认删除？</h3>
-              <p className="text-sm text-gray-500 mt-1">删除后该方案的评分、点评和投票数据将一并清除，此操作不可恢复。</p>
+              <h3 className="text-lg font-bold text-white">确认删除？</h3>
+              <p className="text-sm text-white/50 mt-1">删除后该方案的评分、点评和投票数据将一并清除，此操作不可恢复。</p>
             </div>
             <div className="flex gap-3">
               <button
                 onClick={() => setDeleteConfirm(null)}
-                className="flex-1 py-3 bg-gray-100 text-gray-600 font-medium rounded-xl hover:bg-gray-200 transition"
+                className="flex-1 py-3 glass text-white/70 font-medium rounded-xl hover:bg-white/10 transition"
               >
                 取消
               </button>

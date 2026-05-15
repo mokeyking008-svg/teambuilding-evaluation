@@ -68,7 +68,6 @@ export default function PlanForm({ plan, onSave, onCancel }) {
     if (plan) {
       parsed.id = plan.id;
     } else {
-      // 生成新 ID
       const existing = JSON.parse(localStorage.getItem('tb_plans') || '[]');
       parsed.id = existing.length > 0 ? Math.max(...existing.map(p => p.id)) + 1 : 1;
     }
@@ -80,58 +79,58 @@ export default function PlanForm({ plan, onSave, onCancel }) {
     <form onSubmit={handleSubmit} className="space-y-4">
       {/* 方案名称 */}
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">方案名称 *</label>
+        <label className="block text-sm font-medium text-white/70 mb-1">方案名称 *</label>
         <input
           type="text"
           value={form.name}
           onChange={e => updateField('name', e.target.value)}
           placeholder="例如：山海之间·莫干山两日游"
-          className={`w-full px-4 py-2.5 bg-gray-50 border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-orange-300 focus:border-orange-400 transition ${errors.name ? 'border-red-300 bg-red-50' : 'border-gray-200'}`}
+          className={`input-glass w-full px-4 py-2.5 rounded-xl text-sm ${errors.name ? 'border-red-500/50' : ''}`}
         />
-        {errors.name && <p className="text-xs text-red-500 mt-1">{errors.name}</p>}
+        {errors.name && <p className="text-xs text-red-400 mt-1">{errors.name}</p>}
       </div>
 
       {/* 封面图 */}
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">封面图 *</label>
+        <label className="block text-sm font-medium text-white/70 mb-1">封面图 *</label>
         <CoverPicker
           value={form.cover}
           onChange={url => updateField('cover', url)}
         />
-        {errors.cover && <p className="text-xs text-red-500 mt-1">{errors.cover}</p>}
+        {errors.cover && <p className="text-xs text-red-400 mt-1">{errors.cover}</p>}
       </div>
 
       {/* 地点 */}
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">地点 *</label>
+        <label className="block text-sm font-medium text-white/70 mb-1">地点 *</label>
         <input
           type="text"
           value={form.location}
           onChange={e => updateField('location', e.target.value)}
           placeholder="例如：浙江·莫干山"
-          className={`w-full px-4 py-2.5 bg-gray-50 border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-orange-300 focus:border-orange-400 transition ${errors.location ? 'border-red-300 bg-red-50' : 'border-gray-200'}`}
+          className={`input-glass w-full px-4 py-2.5 rounded-xl text-sm ${errors.location ? 'border-red-500/50' : ''}`}
         />
-        {errors.location && <p className="text-xs text-red-500 mt-1">{errors.location}</p>}
+        {errors.location && <p className="text-xs text-red-400 mt-1">{errors.location}</p>}
       </div>
 
       {/* 时长 + 预算 */}
       <div className="grid grid-cols-2 gap-3">
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">时长</label>
+          <label className="block text-sm font-medium text-white/70 mb-1">时长</label>
           <select
             value={form.duration}
             onChange={e => updateField('duration', e.target.value)}
-            className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-orange-300 focus:border-orange-400 transition"
+            className="input-glass w-full px-4 py-2.5 rounded-xl text-sm"
           >
             {durationOptions.map(d => <option key={d} value={d}>{d}</option>)}
           </select>
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">预算区间</label>
+          <label className="block text-sm font-medium text-white/70 mb-1">预算区间</label>
           <select
             value={form.budget}
             onChange={e => updateField('budget', e.target.value)}
-            className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-orange-300 focus:border-orange-400 transition"
+            className="input-glass w-full px-4 py-2.5 rounded-xl text-sm"
           >
             {budgetOptions.map(b => <option key={b.value} value={b.value}>{b.label}</option>)}
           </select>
@@ -141,79 +140,79 @@ export default function PlanForm({ plan, onSave, onCancel }) {
       {/* 人均预算 + 参与人数 */}
       <div className="grid grid-cols-2 gap-3">
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">人均预算（元）</label>
+          <label className="block text-sm font-medium text-white/70 mb-1">人均预算（元）</label>
           <input
             type="number"
             min="1"
             value={form.budgetNum}
             onChange={e => updateField('budgetNum', e.target.value)}
-            className={`w-full px-4 py-2.5 bg-gray-50 border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-orange-300 focus:border-orange-400 transition ${errors.budgetNum ? 'border-red-300 bg-red-50' : 'border-gray-200'}`}
+            className={`input-glass w-full px-4 py-2.5 rounded-xl text-sm ${errors.budgetNum ? 'border-red-500/50' : ''}`}
           />
-          {errors.budgetNum && <p className="text-xs text-red-500 mt-1">{errors.budgetNum}</p>}
+          {errors.budgetNum && <p className="text-xs text-red-400 mt-1">{errors.budgetNum}</p>}
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">参与人数上限</label>
+          <label className="block text-sm font-medium text-white/70 mb-1">参与人数上限</label>
           <input
             type="number"
             min="1"
             value={form.maxPeople}
             onChange={e => updateField('maxPeople', e.target.value)}
-            className={`w-full px-4 py-2.5 bg-gray-50 border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-orange-300 focus:border-orange-400 transition ${errors.maxPeople ? 'border-red-300 bg-red-50' : 'border-gray-200'}`}
+            className={`input-glass w-full px-4 py-2.5 rounded-xl text-sm ${errors.maxPeople ? 'border-red-500/50' : ''}`}
           />
-          {errors.maxPeople && <p className="text-xs text-red-500 mt-1">{errors.maxPeople}</p>}
+          {errors.maxPeople && <p className="text-xs text-red-400 mt-1">{errors.maxPeople}</p>}
         </div>
       </div>
 
       {/* 方案简介 */}
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">方案简介 *</label>
+        <label className="block text-sm font-medium text-white/70 mb-1">方案简介 *</label>
         <textarea
           value={form.summary}
           onChange={e => updateField('summary', e.target.value)}
           placeholder="3-5 句话介绍方案亮点..."
           rows={3}
-          className={`w-full px-4 py-2.5 bg-gray-50 border rounded-xl text-sm resize-none focus:outline-none focus:ring-2 focus:ring-orange-300 focus:border-orange-400 transition ${errors.summary ? 'border-red-300 bg-red-50' : 'border-gray-200'}`}
+          className={`input-glass w-full px-4 py-2.5 rounded-xl text-sm resize-none ${errors.summary ? 'border-red-500/50' : ''}`}
         />
-        {errors.summary && <p className="text-xs text-red-500 mt-1">{errors.summary}</p>}
+        {errors.summary && <p className="text-xs text-red-400 mt-1">{errors.summary}</p>}
       </div>
 
       {/* 详细介绍 */}
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">详细介绍（可选）</label>
+        <label className="block text-sm font-medium text-white/70 mb-1">详细介绍（可选）</label>
         <textarea
           value={form.details}
           onChange={e => updateField('details', e.target.value)}
           placeholder="详细的活动流程和安排..."
           rows={4}
-          className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm resize-none focus:outline-none focus:ring-2 focus:ring-orange-300 focus:border-orange-400 transition"
+          className="input-glass w-full px-4 py-2.5 rounded-xl text-sm resize-none"
         />
       </div>
 
       {/* 标签 */}
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">标签</label>
+        <label className="block text-sm font-medium text-white/70 mb-1">标签</label>
         <input
           type="text"
           value={form.tags}
           onChange={e => updateField('tags', e.target.value)}
           placeholder="用顿号分隔，如：户外、竞技、BBQ"
-          className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-orange-300 focus:border-orange-400 transition"
+          className="input-glass w-full px-4 py-2.5 rounded-xl text-sm"
         />
-        <p className="text-xs text-gray-400 mt-1">多个标签用顿号或逗号分隔</p>
+        <p className="text-xs text-white/30 mt-1">多个标签用顿号或逗号分隔</p>
       </div>
 
       {/* 按钮 */}
       <div className="flex gap-3 pt-2">
         <button
           type="submit"
-          className="flex-1 py-3 bg-gradient-to-r from-primary to-primary-light text-white font-bold rounded-xl hover:from-primary-dark hover:to-primary transition shadow-md active:scale-[0.98]"
+          className="flex-1 py-3 btn-glass text-white font-bold rounded-xl shadow-lg"
         >
           {plan ? '💾 保存修改' : '➕ 添加方案'}
         </button>
         <button
           type="button"
           onClick={onCancel}
-          className="px-6 py-3 bg-gray-100 text-gray-600 font-medium rounded-xl hover:bg-gray-200 transition"
+          className="px-6 py-3 glass text-white/70 font-medium rounded-xl hover:bg-white/10 transition"
         >
           取消
         </button>

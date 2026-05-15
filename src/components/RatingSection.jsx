@@ -14,8 +14,8 @@ export default function RatingSection({ user, planId, getUserRating, updateRatin
 
   if (!user) {
     return (
-      <div className="bg-orange-50 border border-orange-200 rounded-xl p-5 text-center">
-        <p className="text-orange-600 font-medium">🎉 登录后即可评分和点评</p>
+      <div className="glass rounded-xl p-5 text-center">
+        <p className="text-primary font-medium">🎉 登录后即可评分和点评</p>
       </div>
     );
   }
@@ -50,12 +50,12 @@ export default function RatingSection({ user, planId, getUserRating, updateRatin
 
       {/* 评分区域 */}
       {!submitted ? (
-        <div className="bg-white rounded-xl p-5 border border-gray-100 shadow-sm">
-          <h3 className="text-lg font-bold text-gray-800 mb-4">✍️ 为这个方案打分</h3>
+        <div className="glass rounded-xl p-5">
+          <h3 className="text-lg font-bold text-white/90 mb-4">✍️ 为这个方案打分</h3>
           <div className="space-y-3">
             {ratingDimensions.map(dim => (
               <div key={dim.key} className="flex items-center justify-between">
-                <span className="text-gray-600 text-sm min-w-[100px]">
+                <span className="text-white/60 text-sm min-w-[100px]">
                   {dim.icon} {dim.label}
                 </span>
                 <StarRating
@@ -69,30 +69,30 @@ export default function RatingSection({ user, planId, getUserRating, updateRatin
 
           {/* 文字点评 */}
           <div className="mt-5">
-            <h4 className="text-sm font-semibold text-gray-700 mb-2">💬 写点什么吧</h4>
+            <h4 className="text-sm font-semibold text-white/70 mb-2">💬 写点什么吧</h4>
             <textarea
               value={reviewText}
               onChange={e => setReviewText(e.target.value)}
               placeholder="分享你对这个方案的看法..."
-              className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm resize-none focus:outline-none focus:ring-2 focus:ring-orange-300 focus:border-orange-400 transition"
+              className="input-glass w-full px-4 py-3 rounded-xl text-sm resize-none"
               rows={3}
             />
           </div>
 
           <button
             onClick={handleSubmit}
-            className="mt-4 w-full py-3 bg-gradient-to-r from-primary to-primary-light text-white font-bold rounded-xl hover:from-primary-dark hover:to-primary transition shadow-md hover:shadow-lg active:scale-[0.98]"
+            className="mt-4 w-full py-3 btn-glass text-white font-bold rounded-xl shadow-lg"
           >
             提交评分
           </button>
         </div>
       ) : (
-        <div className="bg-white rounded-xl p-5 border border-green-200 shadow-sm">
+        <div className="glass rounded-xl p-5 border border-success/20">
           <div className="flex items-center justify-between mb-3">
-            <h3 className="text-lg font-bold text-gray-800">📝 我的评分</h3>
+            <h3 className="text-lg font-bold text-white/90">📝 我的评分</h3>
             <button
               onClick={handleModify}
-              className="text-sm text-primary hover:text-primary-dark font-medium transition"
+              className="text-sm text-primary hover:text-primary-light font-medium transition"
             >
               修改
             </button>
@@ -100,14 +100,14 @@ export default function RatingSection({ user, planId, getUserRating, updateRatin
           <div className="space-y-2">
             {ratingDimensions.map(dim => (
               <div key={dim.key} className="flex items-center justify-between">
-                <span className="text-gray-600 text-sm">{dim.icon} {dim.label}</span>
+                <span className="text-white/60 text-sm">{dim.icon} {dim.label}</span>
                 <StarRating value={scores[dim.key]} readOnly size="sm" />
               </div>
             ))}
           </div>
           {reviewText && (
-            <div className="mt-4 pt-4 border-t border-gray-100">
-              <p className="text-gray-600 text-sm">💬 {reviewText}</p>
+            <div className="mt-4 pt-4 border-t border-white/10">
+              <p className="text-white/60 text-sm">💬 {reviewText}</p>
             </div>
           )}
         </div>
@@ -116,17 +116,17 @@ export default function RatingSection({ user, planId, getUserRating, updateRatin
       {/* 点评列表 */}
       {reviews.length > 0 && (
         <div className="space-y-3">
-          <h3 className="text-lg font-bold text-gray-800">🗣️ 大家怎么说</h3>
+          <h3 className="text-lg font-bold text-white/90">🗣️ 大家怎么说</h3>
           {reviews.map((review, idx) => (
-            <div key={idx} className="bg-white rounded-xl p-4 border border-gray-100 shadow-sm">
+            <div key={idx} className="glass glass-hover rounded-xl p-4">
               <div className="flex items-center gap-3 mb-2">
                 <img src={review.userAvatar} alt={review.userName} className="w-8 h-8 rounded-full" />
-                <span className="font-medium text-gray-700 text-sm">{review.userName}</span>
-                <span className="text-xs text-gray-400 ml-auto">
+                <span className="font-medium text-white/80 text-sm">{review.userName}</span>
+                <span className="text-xs text-white/30 ml-auto">
                   {new Date(review.updatedAt || review.createdAt).toLocaleDateString('zh-CN')}
                 </span>
               </div>
-              <p className="text-gray-600 text-sm leading-relaxed">{review.content}</p>
+              <p className="text-white/60 text-sm leading-relaxed">{review.content}</p>
             </div>
           ))}
         </div>
