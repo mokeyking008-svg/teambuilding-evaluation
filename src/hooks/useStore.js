@@ -8,6 +8,11 @@ const KEYS = {
   VOTES: 'tb_votes',
 };
 
+// 头像 URL 生成（统一 lorelei 风格）
+export function getAvatarUrl(seed) {
+  return `https://api.dicebear.com/7.x/lorelei/svg?seed=${encodeURIComponent(seed)}`;
+}
+
 // 初始化 localStorage 数据
 function initStorage() {
   if (!localStorage.getItem(KEYS.RATINGS)) {
@@ -18,6 +23,15 @@ function initStorage() {
   }
   if (!localStorage.getItem(KEYS.VOTES)) {
     localStorage.setItem(KEYS.VOTES, JSON.stringify({}));
+  }
+  // 迁移旧版 fun-emoji 头像 → lorelei
+  const savedUser = localStorage.getItem(KEYS.USER);
+  if (savedUser) {
+    const user = JSON.parse(savedUser);
+    if (user.avatar && user.avatar.includes('fun-emoji')) {
+      user.avatar = getAvatarUrl(user.id);
+      localStorage.setItem(KEYS.USER, JSON.stringify(user));
+    }
   }
 }
 

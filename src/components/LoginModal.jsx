@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { UserCircle, LogIn } from 'lucide-react';
+import { getAvatarUrl } from '../hooks/useStore';
 
 export default function LoginModal({ onLogin, onClose }) {
   const [name, setName] = useState('');
@@ -28,7 +29,7 @@ export default function LoginModal({ onLogin, onClose }) {
       localStorage.setItem('tb_users', JSON.stringify(existingUsers));
     }
 
-    const avatar = `https://api.dicebear.com/7.x/fun-emoji/svg?seed=${encodeURIComponent(userId)}`;
+    const avatar = getAvatarUrl(userId);
     onLogin({ id: userId, name: trimmed, avatar });
   };
 
@@ -67,7 +68,7 @@ export default function LoginModal({ onLogin, onClose }) {
         {name.trim() && (
           <div className="flex items-center gap-3 p-3 glass rounded-xl mb-4">
             <img
-              src={`https://api.dicebear.com/7.x/fun-emoji/svg?seed=${encodeURIComponent(name.trim())}`}
+              src={getAvatarUrl(name.trim())}
               alt="预览"
               className="w-10 h-10 rounded-full border-2 border-white/20"
             />
