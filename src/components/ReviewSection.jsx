@@ -11,7 +11,7 @@ export default function ReviewSection({ user, planId, getUserReview, addReview, 
     return (
       <div className="glass rounded-xl p-5 text-center">
         <p className="text-primary font-medium flex items-center justify-center gap-1.5">
-          <PartyPopper className="w-4 h-4" /> 登录后即可点评
+          <PartyPopper className="w-4 h-4" /> 登录后可点评
         </p>
       </div>
     );
@@ -42,7 +42,7 @@ export default function ReviewSection({ user, planId, getUserReview, addReview, 
       {!submitted ? (
         <div className="glass rounded-xl p-5">
           <h3 className="text-base font-bold text-white/90 mb-3 flex items-center gap-2">
-            <MessageSquare className="w-4 h-4 text-accent" /> 写点什么吧
+            <MessageSquare className="w-4 h-4 text-accent" /> 写点评
           </h3>
           <textarea
             value={reviewText}
@@ -79,7 +79,7 @@ export default function ReviewSection({ user, planId, getUserReview, addReview, 
       {reviews.length > 0 && (
         <div className="space-y-3">
           <h3 className="text-base font-bold text-white/90 flex items-center gap-2">
-            <Users className="w-4 h-4 text-accent" /> 大家怎么说
+            <Users className="w-4 h-4 text-accent" /> 全部点评
           </h3>
           {reviews.map((review, idx) => (
             <div key={idx} className="glass glass-hover rounded-xl p-4">

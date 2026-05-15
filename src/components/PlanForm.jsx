@@ -9,7 +9,6 @@ const emptyForm = {
   duration: '一天',
   budget: '100-200',
   budgetNum: 150,
-  maxPeople: 30,
   summary: '',
   details: '',
   tags: '',
@@ -46,10 +45,9 @@ export default function PlanForm({ plan, onSave, onCancel }) {
   const validate = () => {
     const e = {};
     if (!form.name.trim()) e.name = '请输入方案名称';
-    if (!form.cover.trim()) e.cover = '请选择或输入封面图';
+    if (!form.cover.trim()) e.cover = '请选择封面图';
     if (!form.location.trim()) e.location = '请输入地点';
-    if (!form.summary.trim()) e.summary = '请输入方案简介';
-    if (form.maxPeople < 1) e.maxPeople = '参与人数至少为 1';
+    if (!form.summary.trim()) e.summary = '请输入简介';
     if (form.budgetNum <= 0) e.budgetNum = '预算必须大于 0';
     setErrors(e);
     return Object.keys(e).length === 0;
@@ -63,7 +61,6 @@ export default function PlanForm({ plan, onSave, onCancel }) {
       ...form,
       tags: form.tags.split(/[、,，]/).map(t => t.trim()).filter(Boolean),
       budgetNum: Number(form.budgetNum),
-      maxPeople: Number(form.maxPeople),
     };
 
     if (plan) {
@@ -85,7 +82,7 @@ export default function PlanForm({ plan, onSave, onCancel }) {
           type="text"
           value={form.name}
           onChange={e => updateField('name', e.target.value)}
-          placeholder="例如：山海之间·莫干山两日游"
+          placeholder="如：莫干山两日游"
           className={`input-glass w-full px-4 py-2.5 rounded-xl text-sm ${errors.name ? 'border-red-500/50' : ''}`}
         />
         {errors.name && <p className="text-xs text-red-400 mt-1">{errors.name}</p>}
@@ -108,7 +105,7 @@ export default function PlanForm({ plan, onSave, onCancel }) {
           type="text"
           value={form.location}
           onChange={e => updateField('location', e.target.value)}
-          placeholder="例如：浙江·莫干山"
+          placeholder="如：浙江·莫干山"
           className={`input-glass w-full px-4 py-2.5 rounded-xl text-sm ${errors.location ? 'border-red-500/50' : ''}`}
         />
         {errors.location && <p className="text-xs text-red-400 mt-1">{errors.location}</p>}
@@ -138,39 +135,26 @@ export default function PlanForm({ plan, onSave, onCancel }) {
         </div>
       </div>
 
-      {/* 人均预算 + 参与人数 */}
-      <div className="grid grid-cols-2 gap-3">
-        <div>
-          <label className="block text-sm font-medium text-white/70 mb-1">人均预算（元）</label>
-          <input
-            type="number"
-            min="1"
-            value={form.budgetNum}
-            onChange={e => updateField('budgetNum', e.target.value)}
-            className={`input-glass w-full px-4 py-2.5 rounded-xl text-sm ${errors.budgetNum ? 'border-red-500/50' : ''}`}
-          />
-          {errors.budgetNum && <p className="text-xs text-red-400 mt-1">{errors.budgetNum}</p>}
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-white/70 mb-1">参与人数上限</label>
-          <input
-            type="number"
-            min="1"
-            value={form.maxPeople}
-            onChange={e => updateField('maxPeople', e.target.value)}
-            className={`input-glass w-full px-4 py-2.5 rounded-xl text-sm ${errors.maxPeople ? 'border-red-500/50' : ''}`}
-          />
-          {errors.maxPeople && <p className="text-xs text-red-400 mt-1">{errors.maxPeople}</p>}
-        </div>
+      {/* 人均预算 */}
+      <div>
+        <label className="block text-sm font-medium text-white/70 mb-1">人均预算（元）</label>
+        <input
+          type="number"
+          min="1"
+          value={form.budgetNum}
+          onChange={e => updateField('budgetNum', e.target.value)}
+          className={`input-glass w-full px-4 py-2.5 rounded-xl text-sm ${errors.budgetNum ? 'border-red-500/50' : ''}`}
+        />
+        {errors.budgetNum && <p className="text-xs text-red-400 mt-1">{errors.budgetNum}</p>}
       </div>
 
       {/* 方案简介 */}
       <div>
-        <label className="block text-sm font-medium text-white/70 mb-1">方案简介 *</label>
+        <label className="block text-sm font-medium text-white/70 mb-1">简介 *</label>
         <textarea
           value={form.summary}
           onChange={e => updateField('summary', e.target.value)}
-          placeholder="3-5 句话介绍方案亮点..."
+          placeholder="几句话介绍方案亮点..."
           rows={3}
           className={`input-glass w-full px-4 py-2.5 rounded-xl text-sm resize-none ${errors.summary ? 'border-red-500/50' : ''}`}
         />
@@ -179,11 +163,11 @@ export default function PlanForm({ plan, onSave, onCancel }) {
 
       {/* 详细介绍 */}
       <div>
-        <label className="block text-sm font-medium text-white/70 mb-1">详细介绍（可选）</label>
+        <label className="block text-sm font-medium text-white/70 mb-1">详细介绍</label>
         <textarea
           value={form.details}
           onChange={e => updateField('details', e.target.value)}
-          placeholder="详细的活动流程和安排..."
+          placeholder="详细活动安排..."
           rows={4}
           className="input-glass w-full px-4 py-2.5 rounded-xl text-sm resize-none"
         />
@@ -199,7 +183,7 @@ export default function PlanForm({ plan, onSave, onCancel }) {
           placeholder="用顿号分隔，如：户外、竞技、BBQ"
           className="input-glass w-full px-4 py-2.5 rounded-xl text-sm"
         />
-        <p className="text-xs text-white/30 mt-1">多个标签用顿号或逗号分隔</p>
+        <p className="text-xs text-white/30 mt-1">顿号或逗号分隔</p>
       </div>
 
       {/* 按钮 */}
@@ -208,7 +192,7 @@ export default function PlanForm({ plan, onSave, onCancel }) {
           type="submit"
           className="flex-1 py-3 btn-glass text-white font-bold rounded-xl shadow-lg flex items-center justify-center gap-2"
         >
-          {plan ? <><Save className="w-4 h-4" /> 保存修改</> : <><Plus className="w-4 h-4" /> 添加方案</>}
+          {plan ? <><Save className="w-4 h-4" /> 保存</> : <><Plus className="w-4 h-4" /> 添加</>}
         </button>
         <button
           type="button"

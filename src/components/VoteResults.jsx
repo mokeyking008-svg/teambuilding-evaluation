@@ -37,7 +37,7 @@ export default function VoteResults({ plans, getVoteCount, getTotalVotes, votes,
       <div className="btn-glass rounded-2xl p-5 text-white">
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-white/70 text-sm">参与投票人数</p>
+            <p className="text-white/70 text-sm">投票人数</p>
             <p className="text-3xl font-bold mt-1">{totalVotes}</p>
           </div>
           <div className="text-right">
@@ -58,7 +58,7 @@ export default function VoteResults({ plans, getVoteCount, getTotalVotes, votes,
       {/* 投票柱状图 */}
       <div>
         <h3 className="text-lg font-bold text-white/90 mb-4 flex items-center gap-2">
-          <BarChart3 className="w-5 h-5 text-accent" /> 投票结果
+          <BarChart3 className="w-5 h-5 text-accent" /> 投票排行
         </h3>
         <div className="glass rounded-xl p-5 space-y-4">
           {voteRanking.map((plan, idx) => (
@@ -104,7 +104,7 @@ export default function VoteResults({ plans, getVoteCount, getTotalVotes, votes,
       {/* 评分排名 */}
       <div>
         <h3 className="text-lg font-bold text-white/90 mb-4 flex items-center gap-2">
-          <Star className="w-5 h-5 text-accent" /> 评分排名
+          <Star className="w-5 h-5 text-accent" /> 评分排行
         </h3>
         <div className="glass rounded-xl overflow-hidden">
           {ratingRanking.map((plan, idx) => (
@@ -127,7 +127,7 @@ export default function VoteResults({ plans, getVoteCount, getTotalVotes, votes,
               </span>
               <div className="flex-1 min-w-0">
                 <p className="font-medium text-white/80 text-sm truncate">{plan.name}</p>
-                <p className="text-xs text-white/30">{plan.ratingCount} 人评分</p>
+                <p className="text-xs text-white/30">{plan.ratingCount} 人评</p>
               </div>
               <div className="flex items-center gap-1.5">
                 <Star className="w-4 h-4 text-star fill-star" />

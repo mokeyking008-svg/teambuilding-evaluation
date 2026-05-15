@@ -45,7 +45,7 @@ export default function LoginModal({ onLogin, onClose }) {
             <UserCircle className="w-9 h-9 text-white" />
           </div>
           <h2 className="text-xl font-bold text-white">登录</h2>
-          <p className="text-sm text-white/50 mt-1">输入你的姓名即可参与投票</p>
+          <p className="text-sm text-white/50 mt-1">输入姓名参与投票</p>
         </div>
 
         {/* 输入框 */}
@@ -53,7 +53,7 @@ export default function LoginModal({ onLogin, onClose }) {
           <input
             ref={inputRef}
             type="text"
-            placeholder="请输入姓名"
+            placeholder="输入姓名"
             value={name}
             onChange={e => { setName(e.target.value); setError(''); }}
             onKeyDown={handleKeyDown}
@@ -71,7 +71,7 @@ export default function LoginModal({ onLogin, onClose }) {
               alt="预览"
               className="w-10 h-10 rounded-full border-2 border-white/20"
             />
-            <span className="text-sm text-white/70">{name.trim()} <span className="text-white/40">(你的头像)</span></span>
+            <span className="text-sm text-white/70">{name.trim()}</span>
           </div>
         )}
 

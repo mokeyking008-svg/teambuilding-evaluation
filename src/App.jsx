@@ -151,7 +151,7 @@ function App() {
           <div className="flex items-center gap-3">
             <Tent className="w-6 h-6 text-accent" />
             <h1 className="text-lg font-bold gradient-text hidden sm:block">
-              数字化平台中心 · 团建方案投票
+              团建方案投票
             </h1>
           </div>
           <div className="flex items-center gap-2">
@@ -193,7 +193,7 @@ function App() {
               <p className="text-sm font-medium text-white/90">
                 共 <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-accent font-bold text-lg">{totalVotes}</span> 人参与投票
               </p>
-              <p className="text-xs text-white/40">你的每一票都很重要！</p>
+              <p className="text-xs text-white/40">投出你心仪的方案</p>
             </div>
           </div>
         )}
@@ -258,7 +258,8 @@ function App() {
               return (
                 <div
                   key={plan.id}
-                  className="plan-card glass rounded-2xl overflow-hidden"
+                  className="plan-card glass rounded-2xl overflow-hidden cursor-pointer hover:scale-[1.02] transition-transform duration-200"
+                  onClick={() => toggleDetail(plan.id)}
                 >
                   {/* 封面 + 标题 + 星级角标 */}
                   <div className="relative h-40 overflow-hidden">
@@ -294,29 +295,21 @@ function App() {
                       </span>
                     </div>
 
-                    {/* 底部双按钮 - 投票为主 CTA */}
-                    <div className="flex gap-2">
-                      <button
-                        onClick={() => toggleDetail(plan.id)}
-                        className="flex-1 py-2.5 rounded-xl text-sm font-medium text-white/50 hover:text-white/80 hover:bg-white/5 transition border border-white/10"
-                      >
-                        查看详情
-                      </button>
-                      <button
-                        onClick={() => handleVote(plan.id)}
-                        className={`flex-1 py-2.5 rounded-xl text-sm font-bold transition ${
-                          isVotedByMe
-                            ? 'bg-success/15 text-success border-2 border-success/30'
-                            : 'btn-glass text-white shadow-lg'
-                        } ${voteAnimId === plan.id ? 'vote-pulse' : ''}`}
-                      >
-                        {isVotedByMe ? (
-                          <span className="flex items-center justify-center gap-1"><CheckCircle className="w-4 h-4" /> 已投</span>
-                        ) : (
-                          <span className="flex items-center justify-center gap-1"><ThumbsUp className="w-4 h-4" /> 投票</span>
-                        )}
-                      </button>
-                    </div>
+                    {/* 投票按钮 - 卡片上唯一独立操作 */}
+                    <button
+                      onClick={(e) => { e.stopPropagation(); handleVote(plan.id); }}
+                      className={`w-full py-2.5 rounded-xl text-sm font-bold transition ${
+                        isVotedByMe
+                          ? 'bg-success/15 text-success border-2 border-success/30'
+                          : 'btn-glass text-white shadow-lg'
+                      } ${voteAnimId === plan.id ? 'vote-pulse' : ''}`}
+                    >
+                      {isVotedByMe ? (
+                        <span className="flex items-center justify-center gap-1"><CheckCircle className="w-4 h-4" /> 已投</span>
+                      ) : (
+                        <span className="flex items-center justify-center gap-1"><ThumbsUp className="w-4 h-4" /> 投票</span>
+                      )}
+                    </button>
                   </div>
                 </div>
               );
@@ -358,8 +351,8 @@ function App() {
             <div className="flex items-center gap-3">
               <Trophy className="w-6 h-6 text-accent" />
               <div className="text-left">
-                <h2 className="text-lg font-bold text-white/90 group-hover:text-white transition">查看投票结果</h2>
-                <p className="text-sm text-white/40">票数统计与评分排名</p>
+                <h2 className="text-lg font-bold text-white/90 group-hover:text-white transition">投票结果</h2>
+                <p className="text-sm text-white/40">票数与评分排名</p>
               </div>
             </div>
             <ChevronDown className={`w-5 h-5 text-white/40 transition-transform ${showResults ? 'rotate-180' : ''}`} />
@@ -373,7 +366,7 @@ function App() {
       </main>
 
       <footer className="text-center py-6 text-xs text-white/25 relative z-10">
-        <p>数字化平台中心 · 团建方案投票</p>
+        <p>团建方案投票</p>
       </footer>
 
       {/* Modals */}
@@ -442,7 +435,7 @@ function PlanDetailModal({ plan, user, onClose, onVote, getUserVote, voteAnimId,
             {/* 方案详情 */}
             <div>
               <h3 className="text-base font-bold text-white/90 mb-2 flex items-center gap-2">
-                <FileText className="w-4 h-4 text-accent" /> 方案详情
+                <FileText className="w-4 h-4 text-accent" /> 方案介绍
               </h3>
               <p className="text-white/60 text-sm leading-relaxed">{plan.details || plan.summary}</p>
             </div>
@@ -483,9 +476,9 @@ function PlanDetailModal({ plan, user, onClose, onVote, getUserVote, voteAnimId,
               } ${voteAnimId === plan.id ? 'vote-pulse' : ''}`}
             >
               {isVotedByMe ? (
-                <span className="flex items-center justify-center gap-2"><CheckCircle className="w-5 h-5" /> 已投票（点击改投其他方案）</span>
+                <span className="flex items-center justify-center gap-2"><CheckCircle className="w-5 h-5" /> 已投（点击改投）</span>
               ) : (
-                <span className="flex items-center justify-center gap-2"><ThumbsUp className="w-5 h-5" /> 投票支持这个方案！</span>
+                <span className="flex items-center justify-center gap-2"><ThumbsUp className="w-5 h-5" /> 投票</span>
               )}
             </button>
           </div>

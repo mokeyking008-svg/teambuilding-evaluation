@@ -33,14 +33,14 @@ export default function AdminPanel({ plans, onSavePlans, onExit }) {
     const updated = [...plans, planData];
     onSavePlans(updated);
     setEditingPlan(null);
-    showToast('方案添加成功！');
+    showToast('添加成功');
   };
 
   const handleEdit = (planData) => {
     const updated = plans.map(p => p.id === planData.id ? planData : p);
     onSavePlans(updated);
     setEditingPlan(null);
-    showToast('方案修改成功！');
+    showToast('修改成功');
   };
 
   const handleDelete = (planId) => {
@@ -73,7 +73,7 @@ export default function AdminPanel({ plans, onSavePlans, onExit }) {
               <Lock className="w-6 h-6 text-accent" />
             </div>
             <h2 className="text-xl font-bold text-white">管理员验证</h2>
-            <p className="text-sm text-white/50 mt-1">请输入管理员密码</p>
+            <p className="text-sm text-white/50 mt-1">输入密码</p>
           </div>
           <input
             type="password"
@@ -156,7 +156,7 @@ export default function AdminPanel({ plans, onSavePlans, onExit }) {
               <h2 className="text-lg font-bold text-white flex items-center gap-2">
                 <Settings className="w-5 h-5 text-accent" /> 方案管理
               </h2>
-              <p className="text-sm text-white/50 mt-0.5">共 {plans.length} 个方案</p>
+              <p className="text-sm text-white/50 mt-0.5">{plans.length} 个方案</p>
             </div>
             <div className="flex items-center gap-2">
               <button
@@ -212,7 +212,7 @@ export default function AdminPanel({ plans, onSavePlans, onExit }) {
             {plans.length === 0 && (
               <div className="text-center py-12">
                 <Inbox className="w-12 h-12 text-white/20 mx-auto" />
-                <p className="text-white/30 mt-2">暂无方案，点击上方按钮新增</p>
+                <p className="text-white/30 mt-2">暂无方案</p>
               </div>
             )}
           </div>
@@ -228,7 +228,7 @@ export default function AdminPanel({ plans, onSavePlans, onExit }) {
                 <AlertTriangle className="w-7 h-7 text-red-400" />
               </div>
               <h3 className="text-lg font-bold text-white">确认删除？</h3>
-              <p className="text-sm text-white/50 mt-1">删除后该方案的评分、点评和投票数据将一并清除，此操作不可恢复。</p>
+              <p className="text-sm text-white/50 mt-1">删除后相关数据将一并清除</p>
             </div>
             <div className="flex gap-3">
               <button
