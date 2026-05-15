@@ -108,18 +108,6 @@ const plans = [
 
 export default plans;
 
-// Mock 用户列表（模拟钉钉登录）
-export const mockUsers = [
-  { id: 'user_1', name: '张伟', avatar: 'https://api.dicebear.com/7.x/fun-emoji/svg?seed=ZhangWei' },
-  { id: 'user_2', name: '李娜', avatar: 'https://api.dicebear.com/7.x/fun-emoji/svg?seed=LiNa' },
-  { id: 'user_3', name: '王磊', avatar: 'https://api.dicebear.com/7.x/fun-emoji/svg?seed=WangLei' },
-  { id: 'user_4', name: '刘芳', avatar: 'https://api.dicebear.com/7.x/fun-emoji/svg?seed=LiuFang' },
-  { id: 'user_5', name: '陈晨', avatar: 'https://api.dicebear.com/7.x/fun-emoji/svg?seed=ChenChen' },
-  { id: 'user_6', name: '赵鑫', avatar: 'https://api.dicebear.com/7.x/fun-emoji/svg?seed=ZhaoXin' },
-  { id: 'user_7', name: '孙悦', avatar: 'https://api.dicebear.com/7.x/fun-emoji/svg?seed=SunYue' },
-  { id: 'user_8', name: '周杰', avatar: 'https://api.dicebear.com/7.x/fun-emoji/svg?seed=ZhouJie' },
-];
-
 // 评分维度
 export const ratingDimensions = [
   { key: 'creativity', label: '创意性', icon: '💡' },
