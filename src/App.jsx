@@ -4,11 +4,10 @@ import { ALLOWED_NAMES } from './components/LoginModal';
 import defaultPlans from './data/plans';
 import LoginModal from './components/LoginModal';
 import ReviewSection from './components/ReviewSection';
-import VoteResults from './components/VoteResults';
 import AdminPanel from './components/AdminPanel';
 import {
-  Tent, Settings, LogIn, Vote, ChevronDown, SearchX,
-  MapPin, Clock, Coins, Star, Trophy, X, FileText,
+  Tent, Settings, LogIn, Vote, SearchX,
+  MapPin, Clock, Coins, Star, X, FileText,
   Sparkles, CheckCircle, ThumbsUp,
 } from 'lucide-react';
 
@@ -47,7 +46,6 @@ function App() {
   const [expandedPlan, setExpandedPlan] = useState(null);
   const [filterBudget, setFilterBudget] = useState('all');
   const [filterDuration, setFilterDuration] = useState('all');
-  const [showResults, setShowResults] = useState(true);
   const [voteAnimId, setVoteAnimId] = useState(null);
   const [refreshKey, setRefreshKey] = useState(0);
   const detailRef = useRef(null);
@@ -215,7 +213,7 @@ function App() {
         <div className="mb-6 space-y-2 sm:space-y-3">
           <div className="flex flex-wrap gap-1.5 sm:gap-2 items-center">
             <Coins className="w-3.5 h-3.5 text-white/40 flex-shrink-0" />
-            <span className="text-xs sm:text-sm font-medium text-white/50">预算/人<span className="hidden sm:inline">均预算：</span></span>
+            <span className="text-xs sm:text-sm font-medium text-white/50"><span className="sm:hidden">预算/人</span><span className="hidden sm:inline">人均预算：</span></span>
             {[
               { key: 'all', label: '全部' },
               { key: '0-200', label: '0～200' },
@@ -237,7 +235,7 @@ function App() {
           </div>
           <div className="flex flex-wrap gap-1.5 sm:gap-2 items-center">
             <Clock className="w-3.5 h-3.5 text-white/40 flex-shrink-0" />
-            <span className="text-xs sm:text-sm font-medium text-white/50">时长<span className="hidden sm:inline">（团建时长）：</span></span>
+            <span className="text-xs sm:text-sm font-medium text-white/50"><span className="sm:hidden">时长</span><span className="hidden sm:inline">团建时长：</span></span>
             {[
               { key: 'all', label: '全部' },
               { key: '0.5天', label: '0.5天' },
@@ -355,27 +353,6 @@ function App() {
           />
         )}
 
-        {/* 投票结果 */}
-        <div className="mb-8">
-          <button
-            onClick={() => setShowResults(!showResults)}
-            className="w-full glass glass-hover rounded-2xl p-5 flex items-center justify-between group"
-          >
-            <div className="flex items-center gap-3">
-              <Trophy className="w-6 h-6 text-accent" />
-              <div className="text-left">
-                <h2 className="text-lg font-bold text-white/90 group-hover:text-white transition">投票结果</h2>
-                <p className="text-sm text-white/40">票数与评分排名</p>
-              </div>
-            </div>
-            <ChevronDown className={`w-5 h-5 text-white/40 transition-transform ${showResults ? 'rotate-180' : ''}`} />
-          </button>
-          {showResults && (
-            <div className="mt-4">
-              <VoteResults plans={plans} getVoteCount={getVoteCount} getTotalVotes={getTotalVotes} votes={votes} refreshKey={refreshKey} />
-            </div>
-          )}
-        </div>
       </main>
 
       <footer className="text-center py-6 text-xs text-white/25 relative z-10">
