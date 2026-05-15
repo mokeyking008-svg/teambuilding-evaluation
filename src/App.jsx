@@ -194,7 +194,6 @@ function App() {
               <p className="text-sm font-medium text-white/90">
                 共 <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-accent font-bold text-lg">{totalVotes}</span>/<span className="text-white/60 font-medium">{ALLOWED_NAMES.length}</span> 人参与投票
               </p>
-              <p className="text-xs text-white/40 mt-0.5">投出你心仪的方案</p>
             </div>
             <span className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-primary to-accent">
               {ALLOWED_NAMES.length > 0 ? Math.round((totalVotes / ALLOWED_NAMES.length) * 100) : 0}%
