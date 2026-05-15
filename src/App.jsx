@@ -161,7 +161,7 @@ function App() {
           <div className="flex items-center gap-3">
             <span className="text-2xl">🏕️</span>
             <h1 className="text-lg font-bold gradient-text hidden sm:block">
-              团建方案投票
+              数字化平台中心 · 团建方案投票
             </h1>
           </div>
           <div className="flex items-center gap-2">
