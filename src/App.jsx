@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useUser, useVotes } from './hooks/useStore';
+import { ALLOWED_NAMES } from './components/LoginModal';
 import defaultPlans from './data/plans';
 import LoginModal from './components/LoginModal';
 import ReviewSection from './components/ReviewSection';
@@ -185,18 +186,31 @@ function App() {
       </header>
 
       <main className="max-w-5xl mx-auto px-4 py-6 relative z-10">
-        {/* 投票进度 - Glass */}
-        {totalVotes > 0 && (
-          <div className="mb-6 glass-solid rounded-2xl p-4 flex items-center gap-3">
+        {/* 投票进度 */}
+        <div className="mb-6 glass-solid rounded-2xl p-4">
+          <div className="flex items-center gap-3">
             <Vote className="w-7 h-7 text-accent flex-shrink-0" />
             <div className="flex-1">
               <p className="text-sm font-medium text-white/90">
-                共 <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-accent font-bold text-lg">{totalVotes}</span> 人参与投票
+                共 <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-accent font-bold text-lg">{totalVotes}</span>/<span className="text-white/60 font-medium">{ALLOWED_NAMES.length}</span> 人参与投票
               </p>
-              <p className="text-xs text-white/40">投出你心仪的方案</p>
+              <p className="text-xs text-white/40 mt-0.5">投出你心仪的方案</p>
             </div>
+            <span className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-primary to-accent">
+              {ALLOWED_NAMES.length > 0 ? Math.round((totalVotes / ALLOWED_NAMES.length) * 100) : 0}%
+            </span>
           </div>
-        )}
+          {/* 进度条 */}
+          <div className="mt-3 h-2 bg-white/10 rounded-full overflow-hidden">
+            <div
+              className="h-full rounded-full transition-all duration-700 ease-out"
+              style={{
+                width: `${ALLOWED_NAMES.length > 0 ? Math.min((totalVotes / ALLOWED_NAMES.length) * 100, 100) : 0}%`,
+                background: 'linear-gradient(90deg, #667EEA, #A78BFA)',
+              }}
+            />
+          </div>
+        </div>
 
         {/* 筛选栏 */}
         <div className="mb-6 space-y-2 sm:space-y-3">

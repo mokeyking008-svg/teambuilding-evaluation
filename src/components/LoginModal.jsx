@@ -3,7 +3,7 @@ import { UserCircle, LogIn, ShieldAlert } from 'lucide-react';
 import { getAvatarUrl } from '../hooks/useStore';
 
 // 仅限以下人员登录
-const ALLOWED_NAMES = [
+export const ALLOWED_NAMES = [
   '杨志伟', '高亚鹏', '常大伟', '高露', '张学德', '刘岩',
   '陈汉威', '黄天石', '李青远', '王馨悦', '朱伊凡', '吕梓通',
   '顾文庆', '陈欣蓝', '杨武',
