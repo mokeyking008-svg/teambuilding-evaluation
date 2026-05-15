@@ -161,7 +161,7 @@ function App() {
           <div className="flex items-center gap-3">
             <span className="text-2xl">🏕️</span>
             <h1 className="text-lg font-bold gradient-text hidden sm:block">
-              团建方案评估
+              团建方案投票
             </h1>
           </div>
           <div className="flex items-center gap-2">
@@ -384,7 +384,7 @@ function App() {
       </main>
 
       <footer className="text-center py-6 text-xs text-white/25 relative z-10">
-        <p>团建方案评估工具 · 数据存储在本地浏览器</p>
+        <p>数字化平台中心 · 团建方案投票</p>
       </footer>
 
       {/* Modals */}
