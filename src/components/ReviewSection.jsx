@@ -55,8 +55,8 @@ export default function ReviewSection({ user, planId, getUserReview, addReview, 
       {/* 写点评 */}
       {!submitted ? (
         <div className="glass rounded-xl p-5">
-          <h3 className="text-base font-bold text-white/90 mb-3 flex items-center gap-2">
-            <MessageSquare className="w-4 h-4 text-accent" /> 写点评
+          <h3 className="text-base font-bold text-text-primary mb-3 flex items-center gap-2">
+            <MessageSquare className="w-4 h-4 text-primary" /> 写点评
           </h3>
           <textarea
             value={reviewText}
@@ -75,8 +75,8 @@ export default function ReviewSection({ user, planId, getUserReview, addReview, 
       ) : (
         <div className="glass rounded-xl p-5 border border-success/20">
           <div className="flex items-center justify-between mb-2">
-            <h3 className="text-base font-bold text-white/90 flex items-center gap-2">
-              <PenLine className="w-4 h-4 text-accent" /> 我的点评
+            <h3 className="text-base font-bold text-text-primary flex items-center gap-2">
+              <PenLine className="w-4 h-4 text-primary" /> 我的点评
             </h3>
             <button
               onClick={handleModify}
@@ -85,26 +85,26 @@ export default function ReviewSection({ user, planId, getUserReview, addReview, 
               修改
             </button>
           </div>
-          <p className="text-white/60 text-sm leading-relaxed">{reviewText}</p>
+          <p className="text-text-secondary text-sm leading-relaxed">{reviewText}</p>
         </div>
       )}
 
       {/* 点评列表 */}
       {reviews.length > 0 && (
         <div className="space-y-3">
-          <h3 className="text-base font-bold text-white/90 flex items-center gap-2">
-            <Users className="w-4 h-4 text-accent" /> 全部点评
+          <h3 className="text-base font-bold text-text-primary flex items-center gap-2">
+            <Users className="w-4 h-4 text-primary" /> 全部点评
           </h3>
           {reviews.map((review, idx) => (
             <div key={idx} className="glass glass-hover rounded-xl p-4">
               <div className="flex items-center gap-3 mb-2">
                 <Avatar src={review.userAvatar} name={review.userName} />
-                <span className="font-medium text-white/80 text-sm">{review.userName}</span>
-                <span className="text-xs text-white/30 ml-auto">
+                <span className="font-medium text-text-primary text-sm">{review.userName}</span>
+                <span className="text-xs text-text-light ml-auto">
                   {new Date(review.updatedAt || review.createdAt).toLocaleDateString('zh-CN')}
                 </span>
               </div>
-              <p className="text-white/60 text-sm leading-relaxed">{review.content}</p>
+              <p className="text-text-secondary text-sm leading-relaxed">{review.content}</p>
             </div>
           ))}
         </div>

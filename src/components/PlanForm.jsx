@@ -77,44 +77,44 @@ export default function PlanForm({ plan, onSave, onCancel }) {
     <form onSubmit={handleSubmit} className="space-y-4">
       {/* 方案名称 */}
       <div>
-        <label className="block text-sm font-medium text-white/70 mb-1">方案名称 *</label>
+        <label className="block text-sm font-medium text-text-secondary mb-1">方案名称 *</label>
         <input
           type="text"
           value={form.name}
           onChange={e => updateField('name', e.target.value)}
           placeholder="如：莫干山两日游"
-          className={`input-glass w-full px-4 py-2.5 rounded-xl text-sm ${errors.name ? 'border-red-500/50' : ''}`}
+          className={`input-glass w-full px-4 py-2.5 rounded-xl text-sm ${errors.name ? 'border-red-400/50' : ''}`}
         />
-        {errors.name && <p className="text-xs text-red-400 mt-1">{errors.name}</p>}
+        {errors.name && <p className="text-xs text-red-500 mt-1">{errors.name}</p>}
       </div>
 
       {/* 封面图 */}
       <div>
-        <label className="block text-sm font-medium text-white/70 mb-1">封面图 *</label>
+        <label className="block text-sm font-medium text-text-secondary mb-1">封面图 *</label>
         <CoverPicker
           value={form.cover}
           onChange={url => updateField('cover', url)}
         />
-        {errors.cover && <p className="text-xs text-red-400 mt-1">{errors.cover}</p>}
+        {errors.cover && <p className="text-xs text-red-500 mt-1">{errors.cover}</p>}
       </div>
 
       {/* 地点 */}
       <div>
-        <label className="block text-sm font-medium text-white/70 mb-1">地点 *</label>
+        <label className="block text-sm font-medium text-text-secondary mb-1">地点 *</label>
         <input
           type="text"
           value={form.location}
           onChange={e => updateField('location', e.target.value)}
           placeholder="如：浙江·莫干山"
-          className={`input-glass w-full px-4 py-2.5 rounded-xl text-sm ${errors.location ? 'border-red-500/50' : ''}`}
+          className={`input-glass w-full px-4 py-2.5 rounded-xl text-sm ${errors.location ? 'border-red-400/50' : ''}`}
         />
-        {errors.location && <p className="text-xs text-red-400 mt-1">{errors.location}</p>}
+        {errors.location && <p className="text-xs text-red-500 mt-1">{errors.location}</p>}
       </div>
 
       {/* 时长 + 预算 */}
       <div className="grid grid-cols-2 gap-3">
         <div>
-          <label className="block text-sm font-medium text-white/70 mb-1">时长</label>
+          <label className="block text-sm font-medium text-text-secondary mb-1">时长</label>
           <select
             value={form.duration}
             onChange={e => updateField('duration', e.target.value)}
@@ -124,7 +124,7 @@ export default function PlanForm({ plan, onSave, onCancel }) {
           </select>
         </div>
         <div>
-          <label className="block text-sm font-medium text-white/70 mb-1">预算区间</label>
+          <label className="block text-sm font-medium text-text-secondary mb-1">预算区间</label>
           <select
             value={form.budget}
             onChange={e => updateField('budget', e.target.value)}
@@ -137,33 +137,33 @@ export default function PlanForm({ plan, onSave, onCancel }) {
 
       {/* 人均预算 */}
       <div>
-        <label className="block text-sm font-medium text-white/70 mb-1">人均预算（元）</label>
+        <label className="block text-sm font-medium text-text-secondary mb-1">人均预算（元）</label>
         <input
           type="number"
           min="1"
           value={form.budgetNum}
           onChange={e => updateField('budgetNum', e.target.value)}
-          className={`input-glass w-full px-4 py-2.5 rounded-xl text-sm ${errors.budgetNum ? 'border-red-500/50' : ''}`}
+          className={`input-glass w-full px-4 py-2.5 rounded-xl text-sm ${errors.budgetNum ? 'border-red-400/50' : ''}`}
         />
-        {errors.budgetNum && <p className="text-xs text-red-400 mt-1">{errors.budgetNum}</p>}
+        {errors.budgetNum && <p className="text-xs text-red-500 mt-1">{errors.budgetNum}</p>}
       </div>
 
       {/* 方案简介 */}
       <div>
-        <label className="block text-sm font-medium text-white/70 mb-1">简介 *</label>
+        <label className="block text-sm font-medium text-text-secondary mb-1">简介 *</label>
         <textarea
           value={form.summary}
           onChange={e => updateField('summary', e.target.value)}
           placeholder="几句话介绍方案亮点..."
           rows={3}
-          className={`input-glass w-full px-4 py-2.5 rounded-xl text-sm resize-none ${errors.summary ? 'border-red-500/50' : ''}`}
+          className={`input-glass w-full px-4 py-2.5 rounded-xl text-sm resize-none ${errors.summary ? 'border-red-400/50' : ''}`}
         />
-        {errors.summary && <p className="text-xs text-red-400 mt-1">{errors.summary}</p>}
+        {errors.summary && <p className="text-xs text-red-500 mt-1">{errors.summary}</p>}
       </div>
 
       {/* 详细介绍 */}
       <div>
-        <label className="block text-sm font-medium text-white/70 mb-1">详细介绍</label>
+        <label className="block text-sm font-medium text-text-secondary mb-1">详细介绍</label>
         <textarea
           value={form.details}
           onChange={e => updateField('details', e.target.value)}
@@ -175,7 +175,7 @@ export default function PlanForm({ plan, onSave, onCancel }) {
 
       {/* 标签 */}
       <div>
-        <label className="block text-sm font-medium text-white/70 mb-1">标签</label>
+        <label className="block text-sm font-medium text-text-secondary mb-1">标签</label>
         <input
           type="text"
           value={form.tags}
@@ -183,7 +183,7 @@ export default function PlanForm({ plan, onSave, onCancel }) {
           placeholder="用顿号分隔，如：户外、竞技、BBQ"
           className="input-glass w-full px-4 py-2.5 rounded-xl text-sm"
         />
-        <p className="text-xs text-white/30 mt-1">顿号或逗号分隔</p>
+        <p className="text-xs text-text-light mt-1">顿号或逗号分隔</p>
       </div>
 
       {/* 按钮 */}
@@ -197,7 +197,7 @@ export default function PlanForm({ plan, onSave, onCancel }) {
         <button
           type="button"
           onClick={onCancel}
-          className="px-6 py-3 glass text-white/70 font-medium rounded-xl hover:bg-white/10 transition"
+          className="px-6 py-3 glass text-text-secondary font-medium rounded-xl hover:bg-primary/5 transition"
         >
           取消
         </button>

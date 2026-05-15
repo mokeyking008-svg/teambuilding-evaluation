@@ -87,15 +87,15 @@ export default function LoginModal({ onLogin, onClose }) {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center modal-overlay bg-black/60" onClick={onClose}>
+    <div className="fixed inset-0 z-50 flex items-center justify-center modal-overlay bg-black/30" onClick={onClose}>
       <div className="glass-solid rounded-2xl shadow-2xl w-[90vw] max-w-sm p-6 mx-4" onClick={e => e.stopPropagation()}>
         {/* 头像 + 标题 */}
         <div className="text-center mb-5">
           <div className="inline-flex items-center justify-center w-16 h-16 rounded-full mb-3 btn-glass">
             <UserCircle className="w-9 h-9 text-white" />
           </div>
-          <h2 className="text-xl font-bold text-white">登录</h2>
-          <p className="text-sm text-white/50 mt-1">输入姓名参与投票</p>
+          <h2 className="text-xl font-bold text-text-primary">登录</h2>
+          <p className="text-sm text-text-secondary mt-1">输入姓名参与投票</p>
         </div>
 
         {/* 输入框 + 建议列表 */}
@@ -114,7 +114,7 @@ export default function LoginModal({ onLogin, onClose }) {
             onFocus={() => { if (name.trim()) setShowSuggestions(true); }}
             onKeyDown={handleKeyDown}
             maxLength={10}
-            className={`input-glass w-full px-4 py-3 rounded-xl text-sm ${error ? 'border-red-500/50' : ''}`}
+            className={`input-glass w-full px-4 py-3 rounded-xl text-sm ${error ? 'border-red-400/50' : ''}`}
           />
           {showSuggestions && suggestions.length > 0 && (
             <div className="absolute top-full left-0 right-0 mt-1 glass-solid rounded-xl overflow-hidden shadow-xl z-10">
@@ -125,17 +125,17 @@ export default function LoginModal({ onLogin, onClose }) {
                   onClick={() => selectSuggestion(s)}
                   className={`w-full text-left px-4 py-2.5 text-sm transition flex items-center gap-2.5 ${
                     i === selectedIndex
-                      ? 'bg-white/15 text-white'
-                      : 'text-white/70 hover:bg-white/10 hover:text-white'
+                      ? 'bg-primary/10 text-text-primary'
+                      : 'text-text-secondary hover:bg-primary/5 hover:text-text-primary'
                   }`}
                 >
                   <img
                     src={getAvatarUrl(s)}
                     alt={s}
-                    className="w-6 h-6 rounded-full border border-white/20 flex-shrink-0"
+                    className="w-6 h-6 rounded-full border border-primary/10 flex-shrink-0"
                   />
                   <span>{s}</span>
-                  <span className="ml-auto text-xs text-white/30 font-mono">
+                  <span className="ml-auto text-xs text-text-light font-mono">
                     {s.replace(name.trim(), '')}
                   </span>
                 </button>
@@ -144,8 +144,8 @@ export default function LoginModal({ onLogin, onClose }) {
           )}
           {error && (
             <div className="flex items-center gap-1.5 mt-1.5 ml-1">
-              <ShieldAlert className="w-3.5 h-3.5 text-red-400 flex-shrink-0" />
-              <p className="text-red-400 text-xs">{error}</p>
+              <ShieldAlert className="w-3.5 h-3.5 text-red-500 flex-shrink-0" />
+              <p className="text-red-500 text-xs">{error}</p>
             </div>
           )}
         </div>
@@ -156,9 +156,9 @@ export default function LoginModal({ onLogin, onClose }) {
             <img
               src={getAvatarUrl(name.trim())}
               alt="预览"
-              className="w-10 h-10 rounded-full border-2 border-white/20"
+              className="w-10 h-10 rounded-full border-2 border-primary/15"
             />
-            <span className="text-sm text-white/70">{name.trim()}</span>
+            <span className="text-sm text-text-secondary">{name.trim()}</span>
           </div>
         )}
 
@@ -172,7 +172,7 @@ export default function LoginModal({ onLogin, onClose }) {
 
         <button
           onClick={onClose}
-          className="w-full mt-2 py-2 text-sm text-white/40 hover:text-white/70 transition"
+          className="w-full mt-2 py-2 text-sm text-text-light hover:text-text-secondary transition"
         >
           取消
         </button>

@@ -35,8 +35,8 @@ export default function VoteResults({ plans, getVoteCount, getTotalVotes, votes,
     <div className="space-y-8">
       {/* 投票柱状图 */}
       <div>
-        <h3 className="text-lg font-bold text-white/90 mb-4 flex items-center gap-2">
-          <BarChart3 className="w-5 h-5 text-accent" /> 投票排行
+        <h3 className="text-lg font-bold text-text-primary mb-4 flex items-center gap-2">
+          <BarChart3 className="w-5 h-5 text-primary" /> 投票排行
         </h3>
         <div className="glass rounded-xl p-5 space-y-4">
           {voteRanking.map((plan, idx) => (
@@ -44,20 +44,20 @@ export default function VoteResults({ plans, getVoteCount, getTotalVotes, votes,
               <div className="flex items-center justify-between mb-1.5">
                 <div className="flex items-center gap-2">
                   {idx === 0 && maxVotes > 0 && (
-                    <span className="bg-accent/20 text-accent text-xs font-bold px-2 py-0.5 rounded-full flex items-center gap-1">
+                    <span className="bg-primary/10 text-primary text-xs font-bold px-2 py-0.5 rounded-full flex items-center gap-1">
                       <Trophy className="w-3 h-3" /> 领先
                     </span>
                   )}
-                  <span className="font-medium text-white/80 text-sm truncate max-w-[200px] sm:max-w-none">{plan.name}</span>
+                  <span className="font-medium text-text-primary text-sm truncate max-w-[200px] sm:max-w-none">{plan.name}</span>
                 </div>
-                <span className="text-sm font-bold text-white/90">
+                <span className="text-sm font-bold text-text-primary">
                   {plan.voteCount} 票
                   {plan.votePercent > 0 && (
-                    <span className="text-white/40 font-normal ml-1">({plan.votePercent.toFixed(1)}%)</span>
+                    <span className="text-text-light font-normal ml-1">({plan.votePercent.toFixed(1)}%)</span>
                   )}
                 </span>
               </div>
-              <div className="w-full bg-white/10 rounded-full h-4 sm:h-6 overflow-hidden">
+              <div className="w-full bg-primary/10 rounded-full h-4 sm:h-6 overflow-hidden">
                 <div
                   className={`h-full rounded-full transition-all duration-700 ease-out flex items-center justify-end pr-2 ${
                     idx === 0 && maxVotes > 0
@@ -74,42 +74,42 @@ export default function VoteResults({ plans, getVoteCount, getTotalVotes, votes,
             </div>
           ))}
           {totalVotes === 0 && (
-            <p className="text-center text-white/30 py-4">暂无投票数据</p>
+            <p className="text-center text-text-light py-4">暂无投票数据</p>
           )}
         </div>
       </div>
 
       {/* 评分排名 */}
       <div>
-        <h3 className="text-lg font-bold text-white/90 mb-4 flex items-center gap-2">
-          <Star className="w-5 h-5 text-accent" /> 评分排行
+        <h3 className="text-lg font-bold text-text-primary mb-4 flex items-center gap-2">
+          <Star className="w-5 h-5 text-primary" /> 评分排行
         </h3>
         <div className="glass rounded-xl overflow-hidden">
           {ratingRanking.map((plan, idx) => (
             <div
               key={plan.id}
-              className={`flex items-center gap-4 p-4 ${idx > 0 ? 'border-t border-white/5' : ''} ${
-                idx === 0 && plan.avgRating > 0 ? 'bg-accent/5' : ''
+              className={`flex items-center gap-4 p-4 ${idx > 0 ? 'border-t border-primary/5' : ''} ${
+                idx === 0 && plan.avgRating > 0 ? 'bg-primary/5' : ''
               }`}
             >
               <span className="text-2xl font-bold w-8 text-center">
                 {idx === 0 && plan.avgRating > 0 ? (
-                  <Award className="w-7 h-7 text-amber-400 mx-auto" />
+                  <Award className="w-7 h-7 text-amber-500 mx-auto" />
                 ) : idx === 1 && plan.avgRating > 0 ? (
-                  <Medal className="w-6 h-6 text-gray-300 mx-auto" />
+                  <Medal className="w-6 h-6 text-gray-400 mx-auto" />
                 ) : idx === 2 && plan.avgRating > 0 ? (
-                  <Medal className="w-6 h-6 text-amber-600 mx-auto" />
+                  <Medal className="w-6 h-6 text-amber-700 mx-auto" />
                 ) : (
-                  <span className="text-white/40">{idx + 1}</span>
+                  <span className="text-text-light">{idx + 1}</span>
                 )}
               </span>
               <div className="flex-1 min-w-0">
-                <p className="font-medium text-white/80 text-sm truncate">{plan.name}</p>
-                <p className="text-xs text-white/30">{plan.ratingCount} 人评</p>
+                <p className="font-medium text-text-primary text-sm truncate">{plan.name}</p>
+                <p className="text-xs text-text-light">{plan.ratingCount} 人评</p>
               </div>
               <div className="flex items-center gap-1.5">
                 <Star className="w-4 h-4 text-star fill-star" />
-                <span className="font-bold text-lg text-white/90">{plan.avgRating > 0 ? plan.avgRating.toFixed(1) : '-'}</span>
+                <span className="font-bold text-lg text-text-primary">{plan.avgRating > 0 ? plan.avgRating.toFixed(1) : '-'}</span>
               </div>
             </div>
           ))}

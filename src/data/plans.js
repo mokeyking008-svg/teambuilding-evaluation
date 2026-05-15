@@ -112,7 +112,7 @@ const plans = [
   {
     id: 4,
     name: '脑力风暴·剧本杀+KTV',
-    cover: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=600&h=400&fit=crop',
+    cover: 'https://images.unsplash.com/photo-1632501641765-e568d28b0015?w=600&h=400&fit=crop',
     location: '朝阳区·双井周边',
     duration: '1天',
     budget: '300+',
