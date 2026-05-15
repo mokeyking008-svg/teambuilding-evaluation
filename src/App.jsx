@@ -147,8 +147,17 @@ function App() {
       if (filterBudget === '200-300' && (num < 200 || num > 300)) return false;
       if (filterBudget === '300+' && num < 300) return false;
     }
-    // 时长：精确匹配
-    if (filterDuration !== 'all' && plan.duration !== filterDuration) return false;
+    // 时长：包含匹配（"全天" 匹配 "1天"，"2天" 匹配 "2天1夜"）
+    if (filterDuration !== 'all') {
+      const d = (plan.duration || '').replace(/\s/g, '');
+      if (filterDuration === '0.5天') {
+        if (!d.includes('0.5') && !d.includes('半天')) return false;
+      } else if (filterDuration === '全天') {
+        if (!d.includes('1天') && d.includes('2天')) return false;
+      } else if (filterDuration === '2天') {
+        if (!d.includes('2天')) return false;
+      }
+    }
     return true;
   });
 
