@@ -12,7 +12,7 @@ const KEYS = {
 };
 
 // 数据版本号 — 递增此版本号将清除所有用户的本地数据（投票/评分/点评/登录）
-const DATA_VERSION = 1;
+const DATA_VERSION = 2;
 const DATA_VERSION_KEY = 'tb_data_version';
 
 // 头像 URL 生成（统一 lorelei 风格）
