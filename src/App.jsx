@@ -17,17 +17,49 @@ import {
 // 方案存储 key
 const PLANS_KEY = 'tb_plans';
 
-// 获取方案列表（优先 localStorage，回退到默认）
+// 数据版本号，新增字段后递增以触发迁移
+const PLANS_VERSION_KEY = 'tb_plans_version';
+const PLANS_DATA_VERSION = 2;
+
+// 获取方案列表（优先 localStorage，回退到默认，自动补齐新增字段）
 function loadPlans() {
   const stored = localStorage.getItem(PLANS_KEY);
-  if (stored) {
+  const savedVersion = parseInt(localStorage.getItem(PLANS_VERSION_KEY) || '1', 10);
+
+  if (stored && savedVersion >= PLANS_DATA_VERSION) {
     try {
       const parsed = JSON.parse(stored);
       if (Array.isArray(parsed) && parsed.length > 0) return parsed;
     } catch (e) { /* ignore */ }
   }
+
+  // 有旧数据但版本落后 → 合并迁移：保留用户可能修改的字段，补齐新增结构化字段
+  if (stored && savedVersion < PLANS_DATA_VERSION) {
+    try {
+      const parsed = JSON.parse(stored);
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        const migrated = parsed.map(saved => {
+          const template = defaultPlans.find(d => d.id === saved.id);
+          if (!template) return saved; // 已删除的方案保留原样
+          return {
+            ...template,            // 以默认数据为基底（包含所有最新字段）
+            ...saved,               // 用户自定义字段覆盖（如 name、cover 等）
+            // 确保结构化字段来自最新默认数据
+            itinerary: template.itinerary,
+            budgetBreakdown: template.budgetBreakdown,
+            highlights: template.highlights,
+          };
+        });
+        localStorage.setItem(PLANS_KEY, JSON.stringify(migrated));
+        localStorage.setItem(PLANS_VERSION_KEY, String(PLANS_DATA_VERSION));
+        return migrated;
+      }
+    } catch (e) { /* ignore */ }
+  }
+
   // 首次访问，初始化默认方案到 localStorage
   localStorage.setItem(PLANS_KEY, JSON.stringify(defaultPlans));
+  localStorage.setItem(PLANS_VERSION_KEY, String(PLANS_DATA_VERSION));
   return defaultPlans;
 }
 
