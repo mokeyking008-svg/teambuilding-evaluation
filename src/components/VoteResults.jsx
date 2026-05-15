@@ -1,5 +1,3 @@
-import { useRatings } from '../hooks/useStore';
-
 export default function VoteResults({ plans, getVoteCount, getTotalVotes, votes }) {
   const totalVotes = getTotalVotes();
   const voteResults = {};
@@ -8,20 +6,12 @@ export default function VoteResults({ plans, getVoteCount, getTotalVotes, votes 
     voteResults[plan.id] = getVoteCount(plan.id);
   });
 
-  // 获取评分排名
-  const allRatings = JSON.parse(localStorage.getItem('tb_ratings') || '{}');
+  // 获取评分排名（读取滑块推荐指数 tb_quick_ratings）
+  const allQuickRatings = JSON.parse(localStorage.getItem('tb_quick_ratings') || '{}');
   const ratingRanking = plans.map(plan => {
-    const userRatings = allRatings[plan.id] || {};
-    const values = Object.values(userRatings);
-    let avg = 0;
-    if (values.length > 0) {
-      const dims = Object.keys(values[0]);
-      const dimAvgs = dims.map(dim => {
-        const sum = values.reduce((s, v) => s + (v[dim] || 0), 0);
-        return sum / values.length;
-      });
-      avg = dimAvgs.reduce((s, v) => s + v, 0) / dimAvgs.length;
-    }
+    const planData = allQuickRatings[plan.id] || {};
+    const values = Object.values(planData);
+    const avg = values.length > 0 ? values.reduce((a, b) => a + b, 0) / values.length : 0;
     return { ...plan, avgRating: avg, ratingCount: values.length };
   }).sort((a, b) => b.avgRating - a.avgRating);
 
