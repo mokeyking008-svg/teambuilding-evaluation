@@ -87,14 +87,14 @@ export default function LoginModal({ onLogin, onClose }) {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center modal-overlay bg-black/30" onClick={onClose}>
-      <div className="glass-solid rounded-2xl shadow-2xl w-[90vw] max-w-sm p-6 mx-4" onClick={e => e.stopPropagation()}>
+    <div className="fixed inset-0 z-50 flex items-center justify-center modal-overlay" onClick={onClose}>
+      <div className="bg-white rounded-xl shadow-lg w-[90vw] max-w-sm p-6 mx-4" onClick={e => e.stopPropagation()}>
         {/* 头像 + 标题 */}
         <div className="text-center mb-5">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-full mb-3 btn-glass">
-            <UserCircle className="w-9 h-9 text-white" />
+          <div className="inline-flex items-center justify-center w-14 h-14 rounded-full mb-3 bg-primary">
+            <UserCircle className="w-8 h-8 text-white" />
           </div>
-          <h2 className="text-xl font-bold text-text-primary">登录</h2>
+          <h2 className="text-lg font-bold text-text-primary">登录</h2>
           <p className="text-sm text-text-secondary mt-1">输入姓名参与投票</p>
         </div>
 
@@ -114,10 +114,10 @@ export default function LoginModal({ onLogin, onClose }) {
             onFocus={() => { if (name.trim()) setShowSuggestions(true); }}
             onKeyDown={handleKeyDown}
             maxLength={10}
-            className={`input-glass w-full px-4 py-3 rounded-xl text-sm ${error ? 'border-red-400/50' : ''}`}
+            className={`input-clean w-full px-4 py-3 rounded-lg text-sm ${error ? 'border-red-400/50' : ''}`}
           />
           {showSuggestions && suggestions.length > 0 && (
-            <div className="absolute top-full left-0 right-0 mt-1 glass-solid rounded-xl overflow-hidden shadow-xl z-10">
+            <div className="absolute top-full left-0 right-0 mt-1 bg-white rounded-lg overflow-hidden shadow-lg z-10 border border-[#F0F0F0]">
               {suggestions.map((s, i) => (
                 <button
                   key={s}
@@ -125,14 +125,14 @@ export default function LoginModal({ onLogin, onClose }) {
                   onClick={() => selectSuggestion(s)}
                   className={`w-full text-left px-4 py-2.5 text-sm transition flex items-center gap-2.5 ${
                     i === selectedIndex
-                      ? 'bg-primary/10 text-text-primary'
-                      : 'text-text-secondary hover:bg-primary/5 hover:text-text-primary'
+                      ? 'bg-[#F0FFF5] text-text-primary'
+                      : 'text-text-secondary hover:bg-[#FAFAFA] hover:text-text-primary'
                   }`}
                 >
                   <img
                     src={getAvatarUrl(s)}
                     alt={s}
-                    className="w-6 h-6 rounded-full border border-primary/10 flex-shrink-0"
+                    className="w-6 h-6 rounded-full flex-shrink-0"
                   />
                   <span>{s}</span>
                   <span className="ml-auto text-xs text-text-light font-mono">
@@ -152,11 +152,11 @@ export default function LoginModal({ onLogin, onClose }) {
 
         {/* 预览头像（仅匹配名单时显示） */}
         {name.trim() && ALLOWED_NAMES.includes(name.trim()) && (
-          <div className="flex items-center gap-3 p-3 glass rounded-xl mb-4">
+          <div className="flex items-center gap-3 p-3 bg-[#F5F5F5] rounded-lg mb-4">
             <img
               src={getAvatarUrl(name.trim())}
               alt="预览"
-              className="w-10 h-10 rounded-full border-2 border-primary/15"
+              className="w-9 h-9 rounded-full"
             />
             <span className="text-sm text-text-secondary">{name.trim()}</span>
           </div>
@@ -165,7 +165,7 @@ export default function LoginModal({ onLogin, onClose }) {
         {/* 登录按钮 */}
         <button
           onClick={handleSubmit}
-          className="w-full py-3 btn-glass text-white font-medium rounded-xl shadow-lg flex items-center justify-center gap-2"
+          className="w-full py-3 btn-primary text-sm font-bold rounded-lg flex items-center justify-center gap-1.5"
         >
           <LogIn className="w-4 h-4" /> 进入
         </button>

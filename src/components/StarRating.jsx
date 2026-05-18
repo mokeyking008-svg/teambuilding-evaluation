@@ -44,15 +44,15 @@ export default function StarRating({ value, onChange, size = 'md', readOnly = fa
             transform: 'translateX(-50%)',
           }}
         >
-          <div className="glass-solid rounded-lg px-2.5 py-1 whitespace-nowrap flex items-center gap-1">
+          <div className="bg-white shadow-lg rounded-lg px-2.5 py-1 whitespace-nowrap flex items-center gap-1">
             <span className="text-star font-bold">{hovered}</span>
-            <span className="text-white/40 text-xs">/5</span>
+            <span className="text-text-light text-xs">/5</span>
             {showLabel && (
-              <span className="text-white/50 text-xs ml-0.5">{ratingLabels[hovered]}</span>
+              <span className="text-text-light text-xs ml-0.5">{ratingLabels[hovered]}</span>
             )}
           </div>
           {/* 小三角 */}
-          <div className="mx-auto w-0 h-0 border-l-[5px] border-r-[5px] border-t-[5px] border-l-transparent border-r-transparent border-t-white/10" />
+          <div className="mx-auto w-0 h-0 border-l-[5px] border-r-[5px] border-t-[5px] border-l-transparent border-r-transparent border-t-white" />
         </div>
       )}
 
@@ -94,7 +94,7 @@ export default function StarRating({ value, onChange, size = 'md', readOnly = fa
       {/* 已选分数文字 */}
       {value > 0 && (
         <span className={`ml-1.5 self-center font-medium transition-all duration-200 ${
-          hovered !== null ? 'text-star' : 'text-white/50'
+          hovered !== null ? 'text-star' : 'text-text-light'
         } ${labelSizeClasses[size]}`}>
           {hovered !== null ? hovered : value.toFixed(1)}
         </span>

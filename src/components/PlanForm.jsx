@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import CoverPicker from './CoverPicker';
-import { Save, Plus, ImageIcon, Link, X, Check } from 'lucide-react';
+import { Save, Plus, X, Check } from 'lucide-react';
 
 const emptyForm = {
   name: '',
@@ -83,7 +83,7 @@ export default function PlanForm({ plan, onSave, onCancel }) {
           value={form.name}
           onChange={e => updateField('name', e.target.value)}
           placeholder="如：莫干山两日游"
-          className={`input-glass w-full px-4 py-2.5 rounded-xl text-sm ${errors.name ? 'border-red-400/50' : ''}`}
+          className={`input-clean w-full px-3 py-2.5 rounded-lg text-sm ${errors.name ? 'border-red-400/50' : ''}`}
         />
         {errors.name && <p className="text-xs text-red-500 mt-1">{errors.name}</p>}
       </div>
@@ -106,7 +106,7 @@ export default function PlanForm({ plan, onSave, onCancel }) {
           value={form.location}
           onChange={e => updateField('location', e.target.value)}
           placeholder="如：浙江·莫干山"
-          className={`input-glass w-full px-4 py-2.5 rounded-xl text-sm ${errors.location ? 'border-red-400/50' : ''}`}
+          className={`input-clean w-full px-3 py-2.5 rounded-lg text-sm ${errors.location ? 'border-red-400/50' : ''}`}
         />
         {errors.location && <p className="text-xs text-red-500 mt-1">{errors.location}</p>}
       </div>
@@ -118,7 +118,7 @@ export default function PlanForm({ plan, onSave, onCancel }) {
           <select
             value={form.duration}
             onChange={e => updateField('duration', e.target.value)}
-            className="input-glass w-full px-4 py-2.5 rounded-xl text-sm"
+            className="input-clean w-full px-3 py-2.5 rounded-lg text-sm"
           >
             {durationOptions.map(d => <option key={d} value={d}>{d}</option>)}
           </select>
@@ -128,7 +128,7 @@ export default function PlanForm({ plan, onSave, onCancel }) {
           <select
             value={form.budget}
             onChange={e => updateField('budget', e.target.value)}
-            className="input-glass w-full px-4 py-2.5 rounded-xl text-sm"
+            className="input-clean w-full px-3 py-2.5 rounded-lg text-sm"
           >
             {budgetOptions.map(b => <option key={b.value} value={b.value}>{b.label}</option>)}
           </select>
@@ -143,7 +143,7 @@ export default function PlanForm({ plan, onSave, onCancel }) {
           min="1"
           value={form.budgetNum}
           onChange={e => updateField('budgetNum', e.target.value)}
-          className={`input-glass w-full px-4 py-2.5 rounded-xl text-sm ${errors.budgetNum ? 'border-red-400/50' : ''}`}
+          className={`input-clean w-full px-3 py-2.5 rounded-lg text-sm ${errors.budgetNum ? 'border-red-400/50' : ''}`}
         />
         {errors.budgetNum && <p className="text-xs text-red-500 mt-1">{errors.budgetNum}</p>}
       </div>
@@ -156,7 +156,7 @@ export default function PlanForm({ plan, onSave, onCancel }) {
           onChange={e => updateField('summary', e.target.value)}
           placeholder="几句话介绍方案亮点..."
           rows={3}
-          className={`input-glass w-full px-4 py-2.5 rounded-xl text-sm resize-none ${errors.summary ? 'border-red-400/50' : ''}`}
+          className={`input-clean w-full px-3 py-2.5 rounded-lg text-sm resize-none ${errors.summary ? 'border-red-400/50' : ''}`}
         />
         {errors.summary && <p className="text-xs text-red-500 mt-1">{errors.summary}</p>}
       </div>
@@ -169,7 +169,7 @@ export default function PlanForm({ plan, onSave, onCancel }) {
           onChange={e => updateField('details', e.target.value)}
           placeholder="详细活动安排..."
           rows={4}
-          className="input-glass w-full px-4 py-2.5 rounded-xl text-sm resize-none"
+          className="input-clean w-full px-3 py-2.5 rounded-lg text-sm resize-none"
         />
       </div>
 
@@ -181,7 +181,7 @@ export default function PlanForm({ plan, onSave, onCancel }) {
           value={form.tags}
           onChange={e => updateField('tags', e.target.value)}
           placeholder="用顿号分隔，如：户外、竞技、BBQ"
-          className="input-glass w-full px-4 py-2.5 rounded-xl text-sm"
+          className="input-clean w-full px-3 py-2.5 rounded-lg text-sm"
         />
         <p className="text-xs text-text-light mt-1">顿号或逗号分隔</p>
       </div>
@@ -190,14 +190,14 @@ export default function PlanForm({ plan, onSave, onCancel }) {
       <div className="flex gap-3 pt-2">
         <button
           type="submit"
-          className="flex-1 py-3 btn-glass text-white font-bold rounded-xl shadow-lg flex items-center justify-center gap-2"
+          className="flex-1 py-3 btn-primary text-sm font-bold rounded-lg flex items-center justify-center gap-1.5"
         >
           {plan ? <><Save className="w-4 h-4" /> 保存</> : <><Plus className="w-4 h-4" /> 添加</>}
         </button>
         <button
           type="button"
           onClick={onCancel}
-          className="px-6 py-3 glass text-text-secondary font-medium rounded-xl hover:bg-primary/5 transition"
+          className="px-6 py-3 btn-secondary text-sm font-medium rounded-lg"
         >
           取消
         </button>

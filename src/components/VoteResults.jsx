@@ -10,7 +10,6 @@ export default function VoteResults({ plans, getVoteCount, getTotalVotes, votes,
   });
 
   // 获取评分排名（读取滑块推荐指数 tb_quick_ratings）
-  // refreshKey 变化时重新计算，确保滑块评分后排名立即更新
   const ratingRanking = useMemo(() => {
     const allQuickRatings = JSON.parse(localStorage.getItem('tb_quick_ratings') || '{}');
     return plans.map(plan => {
@@ -35,17 +34,17 @@ export default function VoteResults({ plans, getVoteCount, getTotalVotes, votes,
     <div className="space-y-8">
       {/* 投票柱状图 */}
       <div>
-        <h3 className="text-lg font-bold text-text-primary mb-4 flex items-center gap-2">
-          <BarChart3 className="w-5 h-5 text-primary" /> 投票排行
+        <h3 className="text-base font-bold text-text-primary mb-3 flex items-center gap-1.5">
+          <BarChart3 className="w-4 h-4 text-primary" /> 投票排行
         </h3>
-        <div className="glass rounded-xl p-5 space-y-4">
+        <div className="card p-4 space-y-3">
           {voteRanking.map((plan, idx) => (
             <div key={plan.id}>
-              <div className="flex items-center justify-between mb-1.5">
+              <div className="flex items-center justify-between mb-1">
                 <div className="flex items-center gap-2">
                   {idx === 0 && maxVotes > 0 && (
-                    <span className="bg-primary/10 text-primary text-xs font-bold px-2 py-0.5 rounded-full flex items-center gap-1">
-                      <Trophy className="w-3 h-3" /> 领先
+                    <span className="bg-[#E8FFF0] text-primary text-[10px] font-bold px-2 py-0.5 rounded-full flex items-center gap-0.5">
+                      <Trophy className="w-2.5 h-2.5" /> 领先
                     </span>
                   )}
                   <span className="font-medium text-text-primary text-sm truncate max-w-[200px] sm:max-w-none">{plan.name}</span>
@@ -57,59 +56,59 @@ export default function VoteResults({ plans, getVoteCount, getTotalVotes, votes,
                   )}
                 </span>
               </div>
-              <div className="w-full bg-primary/10 rounded-full h-4 sm:h-6 overflow-hidden">
+              <div className="w-full bg-[#F0F0F0] rounded-full h-3.5 sm:h-5 overflow-hidden">
                 <div
                   className={`h-full rounded-full transition-all duration-700 ease-out flex items-center justify-end pr-2 ${
                     idx === 0 && maxVotes > 0
-                      ? 'bg-gradient-to-r from-primary to-secondary'
-                      : 'bg-gradient-to-r from-primary/50 to-secondary/50'
+                      ? 'bg-primary'
+                      : 'bg-[#B5E8CC]'
                   }`}
                   style={{ width: `${totalVotes > 0 ? Math.max(plan.votePercent, plan.voteCount > 0 ? 8 : 0) : 0}%` }}
                 >
                   {plan.votePercent >= 15 && (
-                    <span className="text-xs font-bold text-white">{plan.votePercent.toFixed(0)}%</span>
+                    <span className="text-[10px] font-bold text-white">{plan.votePercent.toFixed(0)}%</span>
                   )}
                 </div>
               </div>
             </div>
           ))}
           {totalVotes === 0 && (
-            <p className="text-center text-text-light py-4">暂无投票数据</p>
+            <p className="text-center text-text-light py-4 text-sm">暂无投票数据</p>
           )}
         </div>
       </div>
 
       {/* 评分排名 */}
       <div>
-        <h3 className="text-lg font-bold text-text-primary mb-4 flex items-center gap-2">
-          <Star className="w-5 h-5 text-primary" /> 评分排行
+        <h3 className="text-base font-bold text-text-primary mb-3 flex items-center gap-1.5">
+          <Star className="w-4 h-4 text-primary" /> 评分排行
         </h3>
-        <div className="glass rounded-xl overflow-hidden">
+        <div className="card overflow-hidden">
           {ratingRanking.map((plan, idx) => (
             <div
               key={plan.id}
-              className={`flex items-center gap-4 p-4 ${idx > 0 ? 'border-t border-primary/5' : ''} ${
-                idx === 0 && plan.avgRating > 0 ? 'bg-primary/5' : ''
+              className={`flex items-center gap-4 p-4 ${idx > 0 ? 'border-t border-[#F5F5F5]' : ''} ${
+                idx === 0 && plan.avgRating > 0 ? 'bg-[#FAFFFE]' : ''
               }`}
             >
-              <span className="text-2xl font-bold w-8 text-center">
+              <span className="text-xl font-bold w-8 text-center">
                 {idx === 0 && plan.avgRating > 0 ? (
-                  <Award className="w-7 h-7 text-amber-500 mx-auto" />
+                  <Award className="w-6 h-6 text-amber-500 mx-auto" />
                 ) : idx === 1 && plan.avgRating > 0 ? (
-                  <Medal className="w-6 h-6 text-gray-400 mx-auto" />
+                  <Medal className="w-5 h-5 text-gray-400 mx-auto" />
                 ) : idx === 2 && plan.avgRating > 0 ? (
-                  <Medal className="w-6 h-6 text-amber-700 mx-auto" />
+                  <Medal className="w-5 h-5 text-amber-700 mx-auto" />
                 ) : (
                   <span className="text-text-light">{idx + 1}</span>
                 )}
               </span>
               <div className="flex-1 min-w-0">
                 <p className="font-medium text-text-primary text-sm truncate">{plan.name}</p>
-                <p className="text-xs text-text-light">{plan.ratingCount} 人评</p>
+                <p className="text-[11px] text-text-light">{plan.ratingCount} 人评</p>
               </div>
-              <div className="flex items-center gap-1.5">
-                <Star className="w-4 h-4 text-star fill-star" />
-                <span className="font-bold text-lg text-text-primary">{plan.avgRating > 0 ? plan.avgRating.toFixed(1) : '-'}</span>
+              <div className="flex items-center gap-1">
+                <Star className="w-3.5 h-3.5 text-star fill-star" />
+                <span className="font-bold text-base text-text-primary">{plan.avgRating > 0 ? plan.avgRating.toFixed(1) : '-'}</span>
               </div>
             </div>
           ))}
