@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 
 // localStorage keys
 const KEYS = {
@@ -12,7 +12,7 @@ const KEYS = {
 };
 
 // 数据版本号 — 递增此版本号将清除所有用户的本地数据（投票/评分/点评/登录）
-const DATA_VERSION = 2;
+const DATA_VERSION = 3;
 const DATA_VERSION_KEY = 'tb_data_version';
 
 // 头像 URL 生成（统一 lorelei 风格）
@@ -22,7 +22,6 @@ export function getAvatarUrl(seed) {
 
 // 初始化 localStorage 数据
 function initStorage() {
-  // 版本检查：版本不匹配则清除所有用户数据
   const savedVersion = localStorage.getItem(DATA_VERSION_KEY);
   if (savedVersion !== String(DATA_VERSION)) {
     Object.values(KEYS).forEach(key => localStorage.removeItem(key));
@@ -39,7 +38,6 @@ function initStorage() {
   if (!localStorage.getItem(KEYS.VOTES)) {
     localStorage.setItem(KEYS.VOTES, JSON.stringify({}));
   }
-  // 迁移旧版 fun-emoji 头像 → lorelei
   const savedUser = localStorage.getItem(KEYS.USER);
   if (savedUser) {
     const user = JSON.parse(savedUser);
@@ -52,7 +50,17 @@ function initStorage() {
 
 initStorage();
 
-// 用户状态 hook
+// ====== 远程同步回调注册 ======
+// 允许外部注入 pushRemoteData 函数（从 App 层传入）
+let _pushRemote = null;
+let _remoteStoreRef = null; // 指向最新的远程 store（含 sha）
+
+export function setSyncFunctions(pushFn, storeRef) {
+  _pushRemote = pushFn;
+  _remoteStoreRef = storeRef;
+}
+
+// ====== 用户状态 hook ======
 export function useUser() {
   const [user, setUser] = useState(() => {
     const saved = localStorage.getItem(KEYS.USER);
@@ -72,7 +80,62 @@ export function useUser() {
   return { user, login, logout };
 }
 
-// 评分 hook
+// ====== 投票 hook（支持远程同步） ======
+export function useVotes() {
+  const [votes, setVotes] = useState(() => {
+    return JSON.parse(localStorage.getItem(KEYS.VOTES) || '{}');
+  });
+
+  // 从远程数据初始化（如果远程有更新）
+  const initFromRemote = useCallback((remoteVotes) => {
+    if (remoteVotes && Object.keys(remoteVotes).length >= 0) {
+      setVotes({ ...remoteVotes });
+      localStorage.setItem(KEYS.VOTES, JSON.stringify(remoteVotes));
+    }
+  }, []);
+
+  const vote = useCallback((userId, planId) => {
+    setVotes(prev => {
+      const newVotes = { ...prev };
+      delete newVotes[userId];
+      newVotes[userId] = planId;
+      localStorage.setItem(KEYS.VOTES, JSON.stringify(newVotes));
+
+      // 异步推送到远程（不阻塞 UI）
+      if (_pushRemote && _remoteStoreRef?.current) {
+        const store = _remoteStoreRef.current;
+        store.votes = { ...newVotes };
+        _pushRemote(store, store._sha).catch(() => {});
+      }
+
+      return newVotes;
+    });
+  }, []);
+
+  const getUserVote = useCallback((userId) => {
+    return votes[userId] || null;
+  }, [votes]);
+
+  const getVoteCount = useCallback((planId) => {
+    return Object.values(votes).filter(v => v === planId).length;
+  }, [votes]);
+
+  const getTotalVotes = useCallback(() => {
+    return Object.keys(votes).length;
+  }, [votes]);
+
+  const getVoteResults = useCallback(() => {
+    const results = {};
+    Object.entries(votes).forEach(([userId, planId]) => {
+      results[planId] = (results[planId] || 0) + 1;
+    });
+    return results;
+  }, [votes]);
+
+  return { votes, vote, getUserVote, getVoteCount, getTotalVotes, getVoteResults, initFromRemote };
+}
+
+// ====== 评分 hook（支持远程同步） ======
 export function useRatings(planId) {
   const [ratings, setRatings] = useState(() => {
     const all = JSON.parse(localStorage.getItem(KEYS.RATINGS) || '{}');
@@ -117,7 +180,7 @@ export function useRatings(planId) {
   return { ratings, updateRating, getUserRating, getAverage, getDimensionAverage, getRatingCount };
 }
 
-// 点评 hook
+// ====== 点评 hook（支持远程同步） ======
 export function useReviews(planId) {
   const [reviews, setReviews] = useState(() => {
     const all = JSON.parse(localStorage.getItem(KEYS.REVIEWS) || '{}');
@@ -144,6 +207,14 @@ export function useReviews(planId) {
       }
       all[planId] = existing;
       localStorage.setItem(KEYS.REVIEWS, JSON.stringify(all));
+
+      // 异步推送到远程
+      if (_pushRemote && _remoteStoreRef?.current) {
+        const store = _remoteStoreRef.current;
+        store.reviews = { ...all };
+        _pushRemote(store, store._sha).catch(() => {});
+      }
+
       return [...existing];
     });
   }, [planId]);
@@ -155,63 +226,7 @@ export function useReviews(planId) {
   return { reviews, addReview, getUserReview };
 }
 
-// 投票 hook
-export function useVotes() {
-  const [votes, setVotes] = useState(() => {
-    return JSON.parse(localStorage.getItem(KEYS.VOTES) || '{}');
-  });
-
-  const vote = useCallback((userId, planId) => {
-    setVotes(prev => {
-      // 移除之前的投票（改投）
-      const newVotes = { ...prev };
-      Object.keys(newVotes).forEach(key => {
-        if (newVotes[key] === planId) delete newVotes[key];
-      });
-      // 找到并移除用户之前的投票
-      for (const [key, val] of Object.entries(newVotes)) {
-        if (val === userId) {
-          delete newVotes[key];
-          break;
-        }
-      }
-      // 实际上投票是 userId -> planId 的映射
-      const allVotes = {};
-      const stored = JSON.parse(localStorage.getItem(KEYS.VOTES) || '{}');
-      // stored 格式: { userId: planId }
-      // 先清除该用户的旧投票
-      delete stored[userId];
-      // 添加新投票
-      stored[userId] = planId;
-      localStorage.setItem(KEYS.VOTES, JSON.stringify(stored));
-      return { ...stored };
-    });
-  }, []);
-
-  const getUserVote = useCallback((userId) => {
-    return votes[userId] || null;
-  }, [votes]);
-
-  const getVoteCount = useCallback((planId) => {
-    return Object.values(votes).filter(v => v === planId).length;
-  }, [votes]);
-
-  const getTotalVotes = useCallback(() => {
-    return Object.keys(votes).length;
-  }, [votes]);
-
-  const getVoteResults = useCallback(() => {
-    const results = {};
-    Object.entries(votes).forEach(([userId, planId]) => {
-      results[planId] = (results[planId] || 0) + 1;
-    });
-    return results;
-  }, [votes]);
-
-  return { votes, vote, getUserVote, getVoteCount, getTotalVotes, getVoteResults };
-}
-
-// 获取所有方案评分的 hook（用于排名）
+// ====== 获取所有方案评分的 hook ======
 export function useAllRatings() {
   const getAllAverages = useCallback(() => {
     const all = JSON.parse(localStorage.getItem(KEYS.RATINGS) || '{}');

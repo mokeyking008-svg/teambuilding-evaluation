@@ -1,28 +1,43 @@
-import { useState, useEffect, useRef } from 'react';
-import { useUser, useVotes } from './hooks/useStore';
+import { useState, useEffect, useRef, useCallback } from 'react';
+import { useUser, useVotes, setSyncFunctions } from './hooks/useStore';
 import { ALLOWED_NAMES } from './components/LoginModal';
 import defaultPlans from './data/plans';
 import LoginModal from './components/LoginModal';
 import ReviewSection from './components/ReviewSection';
 import AdminPanel from './components/AdminPanel';
+import TokenConfigModal from './components/TokenConfigModal';
 import VoteResults from './components/VoteResults';
 import VoteToast, { showToast } from './components/VoteToast';
+import {
+  fetchRemoteData, pushRemoteData, cacheLocal,
+  readLocalCache, getLocalVersion, usePolling,
+  createEmptyStore, mergeLocalToStore, setToken, hasToken,
+} from './services/githubSync';
 import {
   Tent, Settings, LogIn, Vote, SearchX,
   MapPin, Clock, Coins, Star, X, FileText,
   Sparkles, CheckCircle, ThumbsUp,
-  MessageSquare, TrendingUp,
+  MessageSquare, TrendingUp, RefreshCw, Cloud, CloudOff, Key,
 } from 'lucide-react';
 
-// 方案存储 key
+// 方案存储 key（localStorage 降级用）
 const PLANS_KEY = 'tb_plans';
 
 // 数据版本号，新增字段后递增以触发迁移
 const PLANS_VERSION_KEY = 'tb_plans_version';
 const PLANS_DATA_VERSION = 2;
 
-// 获取方案列表（优先 localStorage，回退到默认，自动补齐新增字段）
-function loadPlans() {
+/**
+ * 获取方案列表 — 远程优先 → 本地缓存 → 默认数据
+ */
+function loadPlansInitial() {
+  // 优先尝试从远程缓存加载（上一次轮询已缓存）
+  const cached = readLocalCache();
+  if (cached && cached.plans && cached.plans.length > 0) {
+    return cached.plans;
+  }
+
+  // 降级到 localStorage 旧数据
   const stored = localStorage.getItem(PLANS_KEY);
   const savedVersion = parseInt(localStorage.getItem(PLANS_VERSION_KEY) || '1', 10);
 
@@ -33,31 +48,7 @@ function loadPlans() {
     } catch (e) { /* ignore */ }
   }
 
-  // 有旧数据但版本落后 → 合并迁移：保留用户可能修改的字段，补齐新增结构化字段
-  if (stored && savedVersion < PLANS_DATA_VERSION) {
-    try {
-      const parsed = JSON.parse(stored);
-      if (Array.isArray(parsed) && parsed.length > 0) {
-        const migrated = parsed.map(saved => {
-          const template = defaultPlans.find(d => d.id === saved.id);
-          if (!template) return saved; // 已删除的方案保留原样
-          return {
-            ...template,            // 以默认数据为基底（包含所有最新字段）
-            ...saved,               // 用户自定义字段覆盖（如 name、cover 等）
-            // 确保结构化字段来自最新默认数据
-            itinerary: template.itinerary,
-            budgetBreakdown: template.budgetBreakdown,
-            highlights: template.highlights,
-          };
-        });
-        localStorage.setItem(PLANS_KEY, JSON.stringify(migrated));
-        localStorage.setItem(PLANS_VERSION_KEY, String(PLANS_DATA_VERSION));
-        return migrated;
-      }
-    } catch (e) { /* ignore */ }
-  }
-
-  // 首次访问，初始化默认方案到 localStorage
+  // 首次访问，初始化默认方案
   localStorage.setItem(PLANS_KEY, JSON.stringify(defaultPlans));
   localStorage.setItem(PLANS_VERSION_KEY, String(PLANS_DATA_VERSION));
   return defaultPlans;
@@ -67,34 +58,164 @@ function App() {
   const { user, login, logout } = useUser();
   const [showLogin, setShowLogin] = useState(false);
   const [showAdmin, setShowAdmin] = useState(false);
+  const [showTokenConfig, setShowTokenConfig] = useState(false);
   const [expandedPlan, setExpandedPlan] = useState(null);
   const [filterBudget, setFilterBudget] = useState('all');
   const [filterDuration, setFilterDuration] = useState('all');
   const [voteAnimId, setVoteAnimId] = useState(null);
   const [refreshKey, setRefreshKey] = useState(0);
+  const [syncStatus, setSyncStatus] = useState('idle'); // idle | syncing | synced | offline | error
+  const [lastSyncTime, setLastSyncTime] = useState(null);
   const detailRef = useRef(null);
+  const remoteStoreRef = useRef(null); // { store, sha }
+  const pollingRef = useRef(null);
 
-  // 方案数据（localStorage 持久化）
-  const [plans, setPlans] = useState(loadPlans);
+  // 方案数据
+  const [plans, setPlans] = useState(loadPlansInitial);
+
+  // 投票（支持远程同步）
+  const { votes, vote, getUserVote, getVoteCount, getTotalVotes, getVoteResults, initFromRemote: initVotesFromRemote } = useVotes();
 
   const forceRefresh = () => setRefreshKey(k => k + 1);
 
-  // 投票
-  const { votes, vote, getUserVote, getVoteCount, getTotalVotes } = useVotes();
+  // ====== 远程同步推送函数 ======
+  const pushRemote = useCallback(async (storeData, sha) => {
+    if (!hasToken()) return { success: false, error: 'No token' };
+    setSyncStatus('syncing');
+    const result = await pushRemoteData(storeData, sha);
+    if (result.success) {
+      remoteStoreRef.current = { store: storeData, sha: result.sha };
+      setSyncStatus('synced');
+      setLastSyncTime(new Date());
+    } else {
+      setSyncStatus('error');
+    }
+    return result;
+  }, []);
 
-  // 保存方案到 localStorage
-  const handleSavePlans = (updated) => {
+  // ====== 注册同步函数到 useStore hooks ======
+  useEffect(() => {
+    setSyncFunctions(pushRemote, remoteStoreRef);
+  }, [pushRemote]);
+
+  // ====== 初始化：从远程拉取数据 ======
+  useEffect(() => {
+    let cancelled = false;
+
+    const init = async () => {
+      setSyncStatus('syncing');
+
+      const result = await fetchRemoteData();
+
+      if (cancelled) return;
+
+      if (result) {
+        const { store, sha } = result;
+        remoteStoreRef.current = { store, sha };
+
+        // 如果远程有数据，使用远程数据
+        if (store.plans && store.plans.length > 0) {
+          setPlans(store.plans);
+          cacheLocal(store);
+        }
+
+        // 同步远程的投票/评分/点评到本地
+        if (store.votes) {
+          initVotesFromRemote(store.votes);
+        }
+        if (store.reviews) {
+          localStorage.setItem('tb_reviews', JSON.stringify(store.reviews));
+        }
+        if (store.quickRatings) {
+          localStorage.setItem('tb_quick_ratings', JSON.stringify(store.quickRatings));
+        }
+
+        setSyncStatus('synced');
+        setLastSyncTime(new Date());
+      } else {
+        // 远程无数据（可能是首次或网络问题）
+        const cached = readLocalCache();
+        if (cached) {
+          setSyncStatus('offline');
+        } else {
+          // 首次使用，尝试把本地默认数据推送到远程
+          if (hasToken()) {
+            const store = createEmptyStore(defaultPlans);
+            const mergeResult = mergeLocalToStore(store);
+            const pushResult = await pushRemote(mergeResult, null);
+            if (!cancelled && pushResult.success) {
+              setSyncStatus('synced');
+            } else {
+              setSyncStatus('offline');
+            }
+          } else {
+            setSyncStatus('offline');
+          }
+        }
+      }
+
+      // 启动轮询
+      if (!cancelled) {
+        pollingRef.current = usePolling((newStore) => {
+          if (cancelled) return;
+          // 远程有更新
+          if (newStore.plans) setPlans(newStore.plans);
+          if (newStore.votes) initVotesFromRemote(newStore.votes);
+          if (newStore.reviews) localStorage.setItem('tb_reviews', JSON.stringify(newStore.reviews));
+          if (newStore.quickRatings) localStorage.setItem('tb_quick_ratings', JSON.stringify(newStore.quickRatings));
+          setSyncStatus('synced');
+          setLastSyncTime(new Date());
+          setRefreshKey(k => k + 1);
+        });
+        pollingRef.current.start();
+      }
+    };
+
+    init();
+
+    return () => {
+      cancelled = true;
+      if (pollingRef.current) pollingRef.current.stop();
+    };
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // ====== 保存方案（管理面板用） — 必须写远程 ======
+  const handleSavePlans = useCallback(async (updated) => {
+    // 先更新本地 UI
     setPlans(updated);
     localStorage.setItem(PLANS_KEY, JSON.stringify(updated));
     forceRefresh();
-  };
 
-  // 点评数据
-  const getReviewData = (planId) => {
+    // 尝试写远程
+    if (hasToken() && remoteStoreRef.current) {
+      const store = { ...remoteStoreRef.current.store };
+      store.plans = updated;
+      await pushRemote(store, remoteStoreRef.current.sha);
+    }
+  }, [pushRemote]);
+
+  // ====== 保存推荐指数评分到远程 ======
+  const handleQuickRatingSave = useCallback(async (planId, userId, score) => {
+    // 先更新本地
+    const all = JSON.parse(localStorage.getItem('tb_quick_ratings') || '{}');
+    if (!all[planId]) all[planId] = {};
+    all[planId][userId] = score;
+    localStorage.setItem('tb_quick_ratings', JSON.stringify(all));
+
+    // 尝试写远程
+    if (hasToken() && remoteStoreRef.current) {
+      const store = { ...remoteStoreRef.current.store };
+      store.quickRatings = { ...all };
+      await pushRemote(store, remoteStoreRef.current.sha);
+    }
+  }, [pushRemote]);
+
+  // ====== 点评数据（支持远程同步） ======
+  const getReviewData = useCallback((planId) => {
     const allReviews = JSON.parse(localStorage.getItem('tb_reviews') || '{}');
     const planReviews = allReviews[planId] || [];
 
-    const addReview = (userId, userName, userAvatar, content) => {
+    const addReview = async (userId, userName, userAvatar, content) => {
       const all = JSON.parse(localStorage.getItem('tb_reviews') || '{}');
       const existing = all[planId] || [];
       const idx = existing.findIndex(r => r.userId === userId);
@@ -103,15 +224,21 @@ function App() {
       else { newReview.createdAt = new Date().toISOString(); existing.push(newReview); }
       all[planId] = existing;
       localStorage.setItem('tb_reviews', JSON.stringify(all));
+
+      // 尝试写远程
+      if (hasToken() && remoteStoreRef.current) {
+        const store = { ...remoteStoreRef.current.store };
+        store.reviews = { ...all };
+        await pushRemote(store, remoteStoreRef.current.sha);
+      }
     };
 
     const getUserReview = (userId) => planReviews.find(r => r.userId === userId) || null;
-
     return { reviews: planReviews, addReview, getUserReview };
-  };
+  }, [pushRemote]);
 
-  // 一键评分数据（滑块推荐指数）
-  const getQuickRatingData = (planId) => {
+  // ====== 一键评分数据 ======
+  const getQuickRatingData = useCallback((planId) => {
     const all = JSON.parse(localStorage.getItem('tb_quick_ratings') || '{}');
     const planData = all[planId] || {};
     const values = Object.values(planData);
@@ -119,24 +246,19 @@ function App() {
     const getRatingCount = () => values.length;
     const getUserScore = (userId) => planData[userId] || null;
     const updateScore = (userId, score) => {
-      const a = JSON.parse(localStorage.getItem('tb_quick_ratings') || '{}');
-      if (!a[planId]) a[planId] = {};
-      a[planId][userId] = score;
-      localStorage.setItem('tb_quick_ratings', JSON.stringify(a));
+      handleQuickRatingSave(planId, userId, score);
     };
     return { getAverage, getRatingCount, getUserScore, updateScore };
-  };
+  }, [handleQuickRatingSave]);
 
   // 过滤方案
   const filteredPlans = plans.filter(plan => {
-    // 预算：按 budgetNum 范围筛选
     if (filterBudget !== 'all') {
       const num = plan.budgetNum || 0;
       if (filterBudget === '0-200' && (num < 0 || num > 200)) return false;
       if (filterBudget === '200-300' && (num < 200 || num > 300)) return false;
       if (filterBudget === '300+' && num < 300) return false;
     }
-    // 时长：包含匹配（"全天" 匹配 "1天"，"2天" 匹配 "2天1夜"）
     if (filterDuration !== 'all') {
       const d = (plan.duration || '').replace(/\s/g, '');
       if (filterDuration === '0.5天') {
@@ -157,10 +279,8 @@ function App() {
     vote(user.id, planId);
     setVoteAnimId(planId);
     setTimeout(() => setVoteAnimId(null), 600);
-    // 显示 toast（投票或改投都显示）
     const plan = plans.find(p => p.id === planId);
     if (plan) {
-      // 延迟一帧以读取更新后的投票数
       setTimeout(() => {
         showToast(plan.name, getTotalVotes());
       }, 50);
@@ -184,7 +304,7 @@ function App() {
 
   return (
     <div className="min-h-screen bg-[#F5F5F5]">
-      {/* 顶部导航 - 白色实心 */}
+      {/* 顶部导航 */}
       <header className="sticky top-0 z-40 nav-bar">
         <div className="max-w-5xl mx-auto px-4 h-12 flex items-center justify-between">
           <div className="flex items-center gap-2.5">
@@ -192,8 +312,18 @@ function App() {
             <h1 className="text-base font-bold text-text-primary hidden sm:block">
               团建方案投票
             </h1>
+            {/* 同步状态指示器 */}
+            <SyncIndicator status={syncStatus} lastSyncTime={lastSyncTime} />
           </div>
           <div className="flex items-center gap-2">
+            {/* Token 配置按钮 */}
+            <button
+              onClick={() => setShowTokenConfig(true)}
+              className="flex items-center gap-1.5 px-2 py-1.5 text-text-light hover:text-text-primary text-sm rounded-lg transition"
+              title="配置 GitHub Token"
+            >
+              <Key className="w-4 h-4" />
+            </button>
             {/* 管理按钮 */}
             <button
               onClick={() => setShowAdmin(true)}
@@ -224,7 +354,7 @@ function App() {
       </header>
 
       <main className="max-w-5xl mx-auto px-4 py-5">
-        {/* 投票进度 - 白色卡片 */}
+        {/* 投票进度 */}
         <div className="mb-5 card p-4">
           <div className="flex items-center gap-3">
             <Vote className="w-5 h-5 text-primary flex-shrink-0" />
@@ -237,7 +367,6 @@ function App() {
               {ALLOWED_NAMES.length > 0 ? Math.round((totalVotes / ALLOWED_NAMES.length) * 100) : 0}%
             </span>
           </div>
-          {/* 进度条 */}
           <div className="mt-3 h-1.5 bg-[#E8E8E8] rounded-full overflow-hidden">
             <div
               className="h-full rounded-full transition-all duration-700 ease-out bg-primary"
@@ -248,7 +377,7 @@ function App() {
           </div>
         </div>
 
-        {/* 筛选栏 - 横向 Tab 风格 */}
+        {/* 筛选栏 */}
         <div className="mb-5 space-y-3">
           <div className="flex gap-2 items-center overflow-x-auto pb-1">
             <span className="text-xs text-text-light flex-shrink-0">预算：</span>
@@ -309,7 +438,6 @@ function App() {
                   className="plan-card card overflow-hidden cursor-pointer"
                   onClick={() => toggleDetail(plan.id)}
                 >
-                  {/* 封面 + 标题 + 角标 */}
                   <div className="relative h-36 overflow-hidden">
                     <img src={plan.cover} alt={plan.name} className="w-full h-full object-cover" loading="lazy" />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
@@ -328,8 +456,6 @@ function App() {
                       </div>
                     )}
                   </div>
-
-                  {/* 信息标签 */}
                   <div className="p-3">
                     <div className="flex flex-wrap gap-1.5 mb-3">
                       <span className="tag-clean inline-flex items-center gap-0.5 text-[11px] px-2 py-0.5 rounded-full">
@@ -342,8 +468,6 @@ function App() {
                         <Coins className="w-2.5 h-2.5" /> ¥{plan.budgetNum}/人
                       </span>
                     </div>
-
-                    {/* 投票按钮 */}
                     <button
                       onClick={(e) => { e.stopPropagation(); handleVote(plan.id); }}
                       className={`w-full py-2 rounded-lg text-xs font-bold transition ${
@@ -412,18 +536,47 @@ function App() {
           onExit={() => setShowAdmin(false)}
         />
       )}
+      {showTokenConfig && (
+        <TokenConfigModal onClose={() => setShowTokenConfig(false)} />
+      )}
     </div>
   );
 }
 
-// 详情弹窗组件
+// ====== 同步状态指示器 ======
+function SyncIndicator({ status, lastSyncTime }) {
+  const config = {
+    idle: { icon: Cloud, color: 'text-text-light', label: '' },
+    syncing: { icon: RefreshCw, color: 'text-primary animate-spin', label: '同步中' },
+    synced: { icon: Cloud, color: 'text-primary', label: '已同步' },
+    offline: { icon: CloudOff, color: 'text-orange-400', label: '离线' },
+    error: { icon: CloudOff, color: 'text-red-400', label: '同步失败' },
+  };
+
+  const { icon: Icon, color, label } = config[status] || config.idle;
+
+  if (status === 'idle') return null;
+
+  const timeStr = lastSyncTime
+    ? lastSyncTime.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })
+    : '';
+
+  return (
+    <div className={`flex items-center gap-1 ${color}`} title={`${label}${timeStr ? ` · ${timeStr}` : ''}`}>
+      <Icon className="w-3.5 h-3.5" />
+      <span className="text-[10px] hidden sm:inline">{label}{timeStr ? ` ${timeStr}` : ''}</span>
+    </div>
+  );
+}
+
+// ====== 详情弹窗组件 ======
 function PlanDetailModal({ plan, user, onClose, onVote, getUserVote, voteAnimId, getReviewData, getQuickRatingData, refreshKey, onRefresh, detailRef }) {
   const reviewData = getReviewData(plan.id);
   const qrd = getQuickRatingData(plan.id);
 
   // eslint-disable-next-line react-hooks/rules-of-hooks
   useEffect(() => {
-    // 触发重新渲染以读取最新 localStorage 数据
+    // refreshKey 变化时触发重新渲染，读取最新 localStorage 数据
   }, [refreshKey]);
 
   const userVoted = getUserVote(user?.id);
@@ -472,7 +625,7 @@ function PlanDetailModal({ plan, user, onClose, onVote, getUserVote, voteAnimId,
               <p className="text-text-secondary text-sm leading-relaxed">{plan.summary}</p>
             </div>
 
-            {/* 结构化详情：行程安排 / 预算明细 / 方案亮点 */}
+            {/* 结构化详情 */}
             {plan.itinerary && (
               <div>
                 <h3 className="text-sm font-bold text-text-primary mb-3 flex items-center gap-1.5">
@@ -547,7 +700,6 @@ function PlanDetailModal({ plan, user, onClose, onVote, getUserVote, voteAnimId,
               </div>
             )}
 
-            {/* 兼容旧版 details 纯文本 */}
             {!plan.itinerary && plan.details && (
               <div>
                 <h3 className="text-sm font-bold text-text-primary mb-2 flex items-center gap-1.5">
@@ -557,7 +709,6 @@ function PlanDetailModal({ plan, user, onClose, onVote, getUserVote, voteAnimId,
               </div>
             )}
 
-            {/* 标签 */}
             {plan.tags && plan.tags.length > 0 && (
               <div className="flex flex-wrap gap-1.5">
                 {plan.tags.map(tag => (
@@ -566,10 +717,8 @@ function PlanDetailModal({ plan, user, onClose, onVote, getUserVote, voteAnimId,
               </div>
             )}
 
-            {/* 已收到的评价 */}
             <ReviewSummary planId={plan.id} getQuickRatingData={getQuickRatingData} getReviewData={getReviewData} />
 
-            {/* 推荐指数评分滑块 */}
             <QuickRatingPanel
               planId={plan.id}
               user={user}
@@ -577,7 +726,6 @@ function PlanDetailModal({ plan, user, onClose, onVote, getUserVote, voteAnimId,
               onRefresh={onRefresh}
             />
 
-            {/* 点评 */}
             <ReviewSection
               user={user}
               planId={plan.id}
@@ -586,7 +734,6 @@ function PlanDetailModal({ plan, user, onClose, onVote, getUserVote, voteAnimId,
               reviews={reviewData.reviews}
             />
 
-            {/* 投票按钮 */}
             <button
               onClick={() => { onVote(plan.id); onRefresh(); }}
               className={`w-full py-3.5 rounded-xl text-sm font-bold transition ${
@@ -608,7 +755,7 @@ function PlanDetailModal({ plan, user, onClose, onVote, getUserVote, voteAnimId,
   );
 }
 
-// 详情页内推荐指数评分滑块
+// ====== 详情页内推荐指数评分滑块 ======
 function QuickRatingPanel({ planId, user, getQuickRatingData, onRefresh }) {
   const qrd = getQuickRatingData(planId);
   const avgScore = qrd.getAverage();
@@ -621,7 +768,7 @@ function QuickRatingPanel({ planId, user, getQuickRatingData, onRefresh }) {
   useEffect(() => {
     const fresh = qrd.getUserScore(user?.id);
     if (fresh) { setSliderVal(fresh); setJustRated(true); }
-  }, [qrd, user?.id]);
+  }, [qrd, user?.id, refreshKey]);
 
   const getScoreLabel = (val) => {
     if (val < 1.5) return '不推荐';
@@ -659,7 +806,6 @@ function QuickRatingPanel({ planId, user, getQuickRatingData, onRefresh }) {
 
   return (
     <div className="card p-4">
-      {/* 标题行 + 平均分统计 */}
       <div className="flex items-center justify-between mb-3">
         <span className="text-sm font-medium text-text-primary flex items-center gap-1.5">
           <Sparkles className="w-3.5 h-3.5 text-primary" /> 推荐指数
@@ -679,7 +825,6 @@ function QuickRatingPanel({ planId, user, getQuickRatingData, onRefresh }) {
         </div>
       </div>
 
-      {/* 滑块 */}
       <div className="relative mb-2">
         <div
           className="absolute top-1/2 -translate-y-1/2 left-0 h-1 rounded-full pointer-events-none bg-primary"
@@ -699,7 +844,6 @@ function QuickRatingPanel({ planId, user, getQuickRatingData, onRefresh }) {
         />
       </div>
 
-      {/* 两端标签 */}
       <div className="flex items-center justify-between">
         <span className="text-[11px] text-text-light">不推荐</span>
         {user ? (
@@ -715,7 +859,7 @@ function QuickRatingPanel({ planId, user, getQuickRatingData, onRefresh }) {
   );
 }
 
-// 详情页评价摘要
+// ====== 详情页评价摘要 ======
 function ReviewSummary({ planId, getQuickRatingData, getReviewData }) {
   const qrd = getQuickRatingData(planId);
   const reviewData = getReviewData(planId);
@@ -724,7 +868,6 @@ function ReviewSummary({ planId, getQuickRatingData, getReviewData }) {
   const ratingCount = qrd.getRatingCount();
   const reviewCount = reviewData.reviews.length;
 
-  // 评分分布统计
   const allQuickRatings = JSON.parse(localStorage.getItem('tb_quick_ratings') || '{}');
   const planRatings = allQuickRatings[planId] || {};
   const scoreValues = Object.values(planRatings);
@@ -734,7 +877,6 @@ function ReviewSummary({ planId, getQuickRatingData, getReviewData }) {
     return { score, count, percent: scoreValues.length > 0 ? (count / scoreValues.length) * 100 : 0 };
   });
 
-  // 评价摘要（取最新3条点评的前20字）
   const recentReviews = [...reviewData.reviews]
     .sort((a, b) => new Date(b.updatedAt || b.createdAt) - new Date(a.updatedAt || a.createdAt))
     .slice(0, 3);
@@ -743,7 +885,6 @@ function ReviewSummary({ planId, getQuickRatingData, getReviewData }) {
 
   return (
     <div className="card p-4">
-      {/* 标题 */}
       <div className="flex items-center justify-between mb-3">
         <span className="text-sm font-bold text-text-primary flex items-center gap-1.5">
           <MessageSquare className="w-3.5 h-3.5 text-primary" /> 已收到的评价
@@ -754,7 +895,6 @@ function ReviewSummary({ planId, getQuickRatingData, getReviewData }) {
       </div>
 
       <div className="flex gap-5">
-        {/* 左侧：大分数 */}
         <div className="flex flex-col items-center justify-center flex-shrink-0 min-w-[60px]">
           <div className="text-3xl font-bold text-text-primary">
             {avgScore > 0 ? avgScore.toFixed(1) : '-'}
@@ -770,7 +910,6 @@ function ReviewSummary({ planId, getQuickRatingData, getReviewData }) {
           <span className="text-[11px] text-text-light mt-1">{ratingCount}人评</span>
         </div>
 
-        {/* 右侧：评分分布 */}
         <div className="flex-1 space-y-1.5">
           {scoreDistribution.map(({ score, count, percent }) => (
             <div key={score} className="flex items-center gap-2">
@@ -792,7 +931,6 @@ function ReviewSummary({ planId, getQuickRatingData, getReviewData }) {
         </div>
       </div>
 
-      {/* 最新点评摘要 */}
       {recentReviews.length > 0 && (
         <div className="mt-3 pt-3 border-t border-[#F0F0F0] space-y-2">
           <div className="flex items-center gap-1.5">
